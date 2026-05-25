@@ -1,0 +1,13 @@
+{
+  "name": "default",
+  "image_path": "",
+  "units": [
+    {
+      "unit_name": "Abyssal Envoy",
+      "row": 10,
+      "col": 1,
+      "quantity": 1,
+      "quantity_mode": "max"
+    }
+  ]
+}

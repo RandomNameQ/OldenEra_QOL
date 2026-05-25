@@ -1,0 +1,15 @@
+theme = "dark"
+tesseract_cmd = ""
+active_profile = "default"
+last_placement_template = "test"
+last_unit_panel = "unit-panel-20260525-152126"
+
+[hotkeys]
+start_unit_placer = "ctrl+alt+f1"
+stop_all = "ctrl+alt+esc"
+capture_window = "ctrl+alt+w"
+
+[automation]
+move_duration_seconds = 0.18
+pause_between_moves_seconds = 0.12
+drag_button = "left"

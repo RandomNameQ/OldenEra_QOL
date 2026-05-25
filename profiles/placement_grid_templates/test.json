@@ -1,0 +1,48 @@
+{
+  "name": "test",
+  "image_path": "assets/units/icons/skeleton_upg_alt.png",
+  "units": [
+    {
+      "unit_name": "Skeleton",
+      "row": 2,
+      "col": 1,
+      "quantity": 18,
+      "quantity_mode": "any"
+    },
+    {
+      "unit_name": "Skeleton",
+      "row": 10,
+      "col": 1,
+      "quantity": 18,
+      "quantity_mode": "any"
+    },
+    {
+      "unit_name": "Skeleton",
+      "row": 8,
+      "col": 1,
+      "quantity": 18,
+      "quantity_mode": "any"
+    },
+    {
+      "unit_name": "Skeleton",
+      "row": 6,
+      "col": 1,
+      "quantity": 18,
+      "quantity_mode": "any"
+    },
+    {
+      "unit_name": "Skeleton",
+      "row": 0,
+      "col": 1,
+      "quantity": 18,
+      "quantity_mode": "any"
+    },
+    {
+      "unit_name": "Skeleton",
+      "row": 10,
+      "col": 0,
+      "quantity": 18,
+      "quantity_mode": "max"
+    }
+  ]
+}

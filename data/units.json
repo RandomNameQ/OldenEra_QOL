@@ -1,0 +1,1186 @@
+{
+  "Abyssal Envoy": {
+    "unit_id": "unspeakable",
+    "icon": "assets/units/icons/unspeakable.png",
+    "visual_3d": "",
+    "faction": "Schism",
+    "faction_id": "unfrozen",
+    "faction_image": "assets/factions/icons/unfrozen_icon.png"
+  },
+  "Abyssal Executor": {
+    "unit_id": "unspeakable_upg_alt",
+    "icon": "assets/units/icons/unspeakable_upg_alt.png",
+    "visual_3d": "",
+    "faction": "Schism",
+    "faction_id": "unfrozen",
+    "faction_image": "assets/factions/icons/unfrozen_icon.png"
+  },
+  "Abyssal Overseer": {
+    "unit_id": "unspeakable_upg",
+    "icon": "assets/units/icons/unspeakable_upg.png",
+    "visual_3d": "",
+    "faction": "Schism",
+    "faction_id": "unfrozen",
+    "faction_image": "assets/factions/icons/unfrozen_icon.png"
+  },
+  "Aga\u2019Shoth Mat\u2019ha": {
+    "unit_id": "frostworm_rider_upg_alt",
+    "icon": "assets/units/icons/frostworm_rider_upg_alt.png",
+    "visual_3d": "",
+    "faction": "Schism",
+    "faction_id": "unfrozen",
+    "faction_image": "assets/factions/icons/unfrozen_icon.png"
+  },
+  "Aga\u2019Shoth Rider": {
+    "unit_id": "frostworm_rider",
+    "icon": "assets/units/icons/frostworm_rider.png",
+    "visual_3d": "",
+    "faction": "Schism",
+    "faction_id": "unfrozen",
+    "faction_image": "assets/factions/icons/unfrozen_icon.png"
+  },
+  "Aga\u2019Shoth Tamer": {
+    "unit_id": "frostworm_rider_upg",
+    "icon": "assets/units/icons/frostworm_rider_upg.png",
+    "visual_3d": "",
+    "faction": "Schism",
+    "faction_id": "unfrozen",
+    "faction_image": "assets/factions/icons/unfrozen_icon.png"
+  },
+  "Angel": {
+    "unit_id": "angel",
+    "icon": "assets/units/icons/angel.png",
+    "visual_3d": "",
+    "faction": "Temple",
+    "faction_id": "human",
+    "faction_image": "assets/factions/icons/human_icon.png"
+  },
+  "Animated Armor": {
+    "unit_id": "animated_armor",
+    "icon": "assets/units/icons/animated_armor.png",
+    "visual_3d": "",
+    "faction": "Neutral",
+    "faction_id": "neutral",
+    "faction_image": "assets/factions/icons/unicorn.png"
+  },
+  "Apotheosis": {
+    "unit_id": "angel_upg_alt",
+    "icon": "assets/units/icons/angel_upg_alt.png",
+    "visual_3d": "",
+    "faction": "Temple",
+    "faction_id": "human",
+    "faction_image": "assets/factions/icons/human_icon.png"
+  },
+  "Arbitrator": {
+    "unit_id": "arbitrator",
+    "icon": "assets/units/icons/arbitrator.png",
+    "visual_3d": "",
+    "faction": "Schism",
+    "faction_id": "unfrozen",
+    "faction_image": "assets/factions/icons/unfrozen_icon.png"
+  },
+  "Archangel": {
+    "unit_id": "angel_upg",
+    "icon": "assets/units/icons/angel_upg.png",
+    "visual_3d": "",
+    "faction": "Temple",
+    "faction_id": "human",
+    "faction_image": "assets/factions/icons/human_icon.png"
+  },
+  "Armored Hound": {
+    "unit_id": "pet_upg_alt",
+    "icon": "assets/units/icons/pet_upg_alt.png",
+    "visual_3d": "",
+    "faction": "Necropolis",
+    "faction_id": "undead",
+    "faction_image": "assets/factions/icons/undead_icon.png"
+  },
+  "Ashen Dragon": {
+    "unit_id": "black_dragon_upg_alt",
+    "icon": "assets/units/icons/black_dragon_upg_alt.png",
+    "visual_3d": "",
+    "faction": "Dungeon",
+    "faction_id": "dungeon",
+    "faction_image": "assets/factions/icons/dungeon_icon.png"
+  },
+  "Aureate Dancer": {
+    "unit_id": "blade_dancer_upg_alt",
+    "icon": "assets/units/icons/blade_dancer_upg_alt.png",
+    "visual_3d": "",
+    "faction": "Dungeon",
+    "faction_id": "dungeon",
+    "faction_image": "assets/factions/icons/dungeon_icon.png"
+  },
+  "Austringer": {
+    "unit_id": "crossbowman_upg",
+    "icon": "assets/units/icons/crossbowman_upg.png",
+    "visual_3d": "",
+    "faction": "Temple",
+    "faction_id": "human",
+    "faction_image": "assets/factions/icons/human_icon.png"
+  },
+  "Avatar": {
+    "unit_id": "avatar",
+    "icon": "assets/units/icons/avatar.png",
+    "visual_3d": "",
+    "faction": "Neutral",
+    "faction_id": "neutral",
+    "faction_image": "assets/factions/icons/unicorn.png"
+  },
+  "Avatar of War": {
+    "unit_id": "avatar_of_war_upg",
+    "icon": "assets/units/icons/avatar_of_war_upg.png",
+    "visual_3d": "",
+    "faction": "Necropolis",
+    "faction_id": "undead",
+    "faction_image": "assets/factions/icons/undead_icon.png"
+  },
+  "Barghest": {
+    "unit_id": "pet_upg",
+    "icon": "assets/units/icons/pet_upg.png",
+    "visual_3d": "",
+    "faction": "Necropolis",
+    "faction_id": "undead",
+    "faction_image": "assets/factions/icons/undead_icon.png"
+  },
+  "Bewitcher": {
+    "unit_id": "succubus_upg_alt",
+    "icon": "assets/units/icons/succubus_upg_alt.png",
+    "visual_3d": "",
+    "faction": "Schism",
+    "faction_id": "unfrozen",
+    "faction_image": "assets/factions/icons/unfrozen_icon.png"
+  },
+  "Binder": {
+    "unit_id": "unfrozen_cultist_upg",
+    "icon": "assets/units/icons/unfrozen_cultist_upg.png",
+    "visual_3d": "",
+    "faction": "Schism",
+    "faction_id": "unfrozen",
+    "faction_image": "assets/factions/icons/unfrozen_icon.png"
+  },
+  "Black Dragon": {
+    "unit_id": "black_dragon_upg",
+    "icon": "assets/units/icons/black_dragon_upg.png",
+    "visual_3d": "",
+    "faction": "Dungeon",
+    "faction_id": "dungeon",
+    "faction_image": "assets/factions/icons/dungeon_icon.png"
+  },
+  "Bleak Infiltrator": {
+    "unit_id": "assassin_upg_alt",
+    "icon": "assets/units/icons/assassin_upg_alt.png",
+    "visual_3d": "",
+    "faction": "Dungeon",
+    "faction_id": "dungeon",
+    "faction_image": "assets/factions/icons/dungeon_icon.png"
+  },
+  "Bloated Arbitrator": {
+    "unit_id": "arbitrator_upg_alt",
+    "icon": "assets/units/icons/arbitrator_upg_alt.png",
+    "visual_3d": "",
+    "faction": "Schism",
+    "faction_id": "unfrozen",
+    "faction_image": "assets/factions/icons/unfrozen_icon.png"
+  },
+  "Brumal Naiad": {
+    "unit_id": "aqualotl_upg_alt",
+    "icon": "assets/units/icons/aqualotl_upg_alt.png",
+    "visual_3d": "",
+    "faction": "Grove",
+    "faction_id": "nature",
+    "faction_image": "assets/factions/icons/spring_icon.png"
+  },
+  "Cavalry": {
+    "unit_id": "sunlight_cavalry",
+    "icon": "assets/units/icons/sunlight_cavalry.png",
+    "visual_3d": "",
+    "faction": "Temple",
+    "faction_id": "human",
+    "faction_image": "assets/factions/icons/human_icon.png"
+  },
+  "Cave Dragon": {
+    "unit_id": "black_dragon",
+    "icon": "assets/units/icons/black_dragon.png",
+    "visual_3d": "",
+    "faction": "Dungeon",
+    "faction_id": "dungeon",
+    "faction_image": "assets/factions/icons/dungeon_icon.png"
+  },
+  "Chanter": {
+    "unit_id": "wasp_upg",
+    "icon": "assets/units/icons/wasp_upg.png",
+    "visual_3d": "",
+    "faction": "Hive",
+    "faction_id": "demon",
+    "faction_image": "assets/factions/icons/hive_icon.png"
+  },
+  "Chthonic Hydra": {
+    "unit_id": "hydra_upg",
+    "icon": "assets/units/icons/hydra_upg.png",
+    "visual_3d": "",
+    "faction": "Dungeon",
+    "faction_id": "dungeon",
+    "faction_image": "assets/factions/icons/dungeon_icon.png"
+  },
+  "Concubus": {
+    "unit_id": "succubus",
+    "icon": "assets/units/icons/succubus.png",
+    "visual_3d": "",
+    "faction": "Schism",
+    "faction_id": "unfrozen",
+    "faction_image": "assets/factions/icons/unfrozen_icon.png"
+  },
+  "Couatl": {
+    "unit_id": "coatl",
+    "icon": "assets/units/icons/coatl.png",
+    "visual_3d": "",
+    "faction": "Neutral",
+    "faction_id": "neutral",
+    "faction_image": "assets/factions/icons/unicorn.png"
+  },
+  "Crossbowman": {
+    "unit_id": "crossbowman",
+    "icon": "assets/units/icons/crossbowman.png",
+    "visual_3d": "",
+    "faction": "Temple",
+    "faction_id": "human",
+    "faction_image": "assets/factions/icons/human_icon.png"
+  },
+  "Crystal Iriyad": {
+    "unit_id": "ent_upg_alt",
+    "icon": "assets/units/icons/ent_upg_alt.png",
+    "visual_3d": "",
+    "faction": "Grove",
+    "faction_id": "nature",
+    "faction_image": "assets/factions/icons/spring_icon.png"
+  },
+  "Cultist": {
+    "unit_id": "unfrozen_cultist",
+    "icon": "assets/units/icons/unfrozen_cultist.png",
+    "visual_3d": "",
+    "faction": "Schism",
+    "faction_id": "unfrozen",
+    "faction_image": "assets/factions/icons/unfrozen_icon.png"
+  },
+  "Dawn Hoplet": {
+    "unit_id": "twinkle_upg",
+    "icon": "assets/units/icons/twinkle_upg.png",
+    "visual_3d": "",
+    "faction": "Grove",
+    "faction_id": "nature",
+    "faction_image": "assets/factions/icons/spring_icon.png"
+  },
+  "Devourer": {
+    "unit_id": "olgoi_upg",
+    "icon": "assets/units/icons/olgoi_upg.png",
+    "visual_3d": "",
+    "faction": "Hive",
+    "faction_id": "demon",
+    "faction_image": "assets/factions/icons/hive_icon.png"
+  },
+  "dragon_name": {
+    "unit_id": "dragon",
+    "icon": "assets/units/icons/dragon.png",
+    "visual_3d": "",
+    "faction": "Neutral",
+    "faction_id": "neutral",
+    "faction_image": "assets/factions/icons/unicorn.png"
+  },
+  "Dragonslayer": {
+    "unit_id": "dragon_hunter",
+    "icon": "assets/units/icons/dragon_hunter.png",
+    "visual_3d": "",
+    "faction": "Neutral",
+    "faction_id": "neutral",
+    "faction_image": "assets/factions/icons/unicorn.png"
+  },
+  "Dread Knight": {
+    "unit_id": "avatar_of_war",
+    "icon": "assets/units/icons/avatar_of_war.png",
+    "visual_3d": "",
+    "faction": "Necropolis",
+    "faction_id": "undead",
+    "faction_image": "assets/factions/icons/undead_icon.png"
+  },
+  "Dusk Hoplet": {
+    "unit_id": "twinkle_upg_alt",
+    "icon": "assets/units/icons/twinkle_upg_alt.png",
+    "visual_3d": "",
+    "faction": "Grove",
+    "faction_id": "nature",
+    "faction_image": "assets/factions/icons/spring_icon.png"
+  },
+  "Energy Phoenix": {
+    "unit_id": "phoenix_upg_alt",
+    "icon": "assets/units/icons/phoenix_upg_alt.png",
+    "visual_3d": "",
+    "faction": "Grove",
+    "faction_id": "nature",
+    "faction_image": "assets/factions/icons/spring_icon.png"
+  },
+  "Excommunicator": {
+    "unit_id": "inquisitor_upg_alt",
+    "icon": "assets/units/icons/inquisitor_upg_alt.png",
+    "visual_3d": "",
+    "faction": "Temple",
+    "faction_id": "human",
+    "faction_image": "assets/factions/icons/human_icon.png"
+  },
+  "Faerie Dragon": {
+    "unit_id": "fairy_dragon",
+    "icon": "assets/units/icons/fairy_dragon.png",
+    "visual_3d": "",
+    "faction": "Neutral",
+    "faction_id": "neutral",
+    "faction_image": "assets/factions/icons/unicorn.png"
+  },
+  "Faun": {
+    "unit_id": "elf_tracker",
+    "icon": "assets/units/icons/elf_tracker.png",
+    "visual_3d": "",
+    "faction": "Grove",
+    "faction_id": "nature",
+    "faction_image": "assets/factions/icons/spring_icon.png"
+  },
+  "Faun Archer": {
+    "unit_id": "elf_tracker_upg",
+    "icon": "assets/units/icons/elf_tracker_upg.png",
+    "visual_3d": "",
+    "faction": "Grove",
+    "faction_id": "nature",
+    "faction_image": "assets/factions/icons/spring_icon.png"
+  },
+  "Faun Warrior": {
+    "unit_id": "elf_tracker_upg_alt",
+    "icon": "assets/units/icons/elf_tracker_upg_alt.png",
+    "visual_3d": "",
+    "faction": "Grove",
+    "faction_id": "nature",
+    "faction_image": "assets/factions/icons/spring_icon.png"
+  },
+  "Ferocious Ra\u2019Shoth": {
+    "unit_id": "lesser_eldritch_upg_alt",
+    "icon": "assets/units/icons/lesser_eldritch_upg_alt.png",
+    "visual_3d": "",
+    "faction": "Schism",
+    "faction_id": "unfrozen",
+    "faction_image": "assets/factions/icons/unfrozen_icon.png"
+  },
+  "Fire Larva": {
+    "unit_id": "lava_larva",
+    "icon": "assets/units/icons/lava_larva.png",
+    "visual_3d": "",
+    "faction": "Hive",
+    "faction_id": "demon",
+    "faction_image": "assets/factions/icons/hive_icon.png"
+  },
+  "Flaming Phoenix": {
+    "unit_id": "phoenix_upg",
+    "icon": "assets/units/icons/phoenix_upg.png",
+    "visual_3d": "",
+    "faction": "Grove",
+    "faction_id": "nature",
+    "faction_image": "assets/factions/icons/spring_icon.png"
+  },
+  "Fungal Iriyad": {
+    "unit_id": "ent_upg",
+    "icon": "assets/units/icons/ent_upg.png",
+    "visual_3d": "",
+    "faction": "Grove",
+    "faction_id": "nature",
+    "faction_image": "assets/factions/icons/spring_icon.png"
+  },
+  "Ghoul": {
+    "unit_id": "undead_peasant",
+    "icon": "assets/units/icons/undead_peasant.png",
+    "visual_3d": "",
+    "faction": "Neutral",
+    "faction_id": "neutral",
+    "faction_image": "assets/factions/icons/unicorn.png"
+  },
+  "Giant Toad": {
+    "unit_id": "giant_frog",
+    "icon": "assets/units/icons/giant_frog.png",
+    "visual_3d": "",
+    "faction": "Neutral",
+    "faction_id": "neutral",
+    "faction_image": "assets/factions/icons/unicorn.png"
+  },
+  "Gnat": {
+    "unit_id": "gnat",
+    "icon": "assets/units/icons/gnat.png",
+    "visual_3d": "",
+    "faction": "Neutral",
+    "faction_id": "neutral",
+    "faction_image": "assets/factions/icons/unicorn.png"
+  },
+  "Grand Shoth": {
+    "unit_id": "eldritch_flyer",
+    "icon": "assets/units/icons/eldritch_flyer.png",
+    "visual_3d": "",
+    "faction": "Schism",
+    "faction_id": "unfrozen",
+    "faction_image": "assets/factions/icons/unfrozen_icon.png"
+  },
+  "Graverobber": {
+    "unit_id": "graverobber",
+    "icon": "assets/units/icons/graverobber.png",
+    "visual_3d": "",
+    "faction": "Necropolis",
+    "faction_id": "undead",
+    "faction_image": "assets/factions/icons/undead_icon.png"
+  },
+  "Griffin": {
+    "unit_id": "griffin",
+    "icon": "assets/units/icons/griffin.png",
+    "visual_3d": "",
+    "faction": "Temple",
+    "faction_id": "human",
+    "faction_image": "assets/factions/icons/human_icon.png"
+  },
+  "Groll": {
+    "unit_id": "gorilla",
+    "icon": "assets/units/icons/gorilla.png",
+    "visual_3d": "",
+    "faction": "Neutral",
+    "faction_id": "neutral",
+    "faction_image": "assets/factions/icons/unicorn.png"
+  },
+  "Guard Captain": {
+    "unit_id": "esquire_upg",
+    "icon": "assets/units/icons/esquire_upg.png",
+    "visual_3d": "",
+    "faction": "Temple",
+    "faction_id": "human",
+    "faction_image": "assets/factions/icons/human_icon.png"
+  },
+  "Guardian Griffin": {
+    "unit_id": "griffin_upg_alt",
+    "icon": "assets/units/icons/griffin_upg_alt.png",
+    "visual_3d": "",
+    "faction": "Temple",
+    "faction_id": "human",
+    "faction_image": "assets/factions/icons/human_icon.png"
+  },
+  "Guile Infiltrator": {
+    "unit_id": "assassin_upg",
+    "icon": "assets/units/icons/assassin_upg.png",
+    "visual_3d": "",
+    "faction": "Dungeon",
+    "faction_id": "dungeon",
+    "faction_image": "assets/factions/icons/dungeon_icon.png"
+  },
+  "Halfling": {
+    "unit_id": "halfling",
+    "icon": "assets/units/icons/halfling.png",
+    "visual_3d": "",
+    "faction": "Neutral",
+    "faction_id": "neutral",
+    "faction_image": "assets/factions/icons/unicorn.png"
+  },
+  "Harvester Locust": {
+    "unit_id": "locust_upg_alt",
+    "icon": "assets/units/icons/locust_upg_alt.png",
+    "visual_3d": "",
+    "faction": "Hive",
+    "faction_id": "demon",
+    "faction_image": "assets/factions/icons/hive_icon.png"
+  },
+  "Herbomancer": {
+    "unit_id": "druid",
+    "icon": "assets/units/icons/druid.png",
+    "visual_3d": "",
+    "faction": "Grove",
+    "faction_id": "nature",
+    "faction_image": "assets/factions/icons/spring_icon.png"
+  },
+  "Hierophant": {
+    "unit_id": "lightweaver_upg",
+    "icon": "assets/units/icons/lightweaver_upg.png",
+    "visual_3d": "",
+    "faction": "Temple",
+    "faction_id": "human",
+    "faction_image": "assets/factions/icons/human_icon.png"
+  },
+  "Hive Huntress": {
+    "unit_id": "hive_queen_upg_alt",
+    "icon": "assets/units/icons/hive_queen_upg_alt.png",
+    "visual_3d": "",
+    "faction": "Hive",
+    "faction_id": "demon",
+    "faction_image": "assets/factions/icons/hive_icon.png"
+  },
+  "Hive Mother": {
+    "unit_id": "hive_queen_upg",
+    "icon": "assets/units/icons/hive_queen_upg.png",
+    "visual_3d": "",
+    "faction": "Hive",
+    "faction_id": "demon",
+    "faction_image": "assets/factions/icons/hive_icon.png"
+  },
+  "Hive Queen": {
+    "unit_id": "hive_queen",
+    "icon": "assets/units/icons/hive_queen.png",
+    "visual_3d": "",
+    "faction": "Hive",
+    "faction_id": "demon",
+    "faction_image": "assets/factions/icons/hive_icon.png"
+  },
+  "Hollow Reaper": {
+    "unit_id": "avatar_of_war_upg_alt",
+    "icon": "assets/units/icons/avatar_of_war_upg_alt.png",
+    "visual_3d": "",
+    "faction": "Necropolis",
+    "faction_id": "undead",
+    "faction_image": "assets/factions/icons/undead_icon.png"
+  },
+  "Hoplet": {
+    "unit_id": "twinkle",
+    "icon": "assets/units/icons/twinkle.png",
+    "visual_3d": "",
+    "faction": "Grove",
+    "faction_id": "nature",
+    "faction_image": "assets/factions/icons/spring_icon.png"
+  },
+  "Hornet": {
+    "unit_id": "wasp",
+    "icon": "assets/units/icons/wasp.png",
+    "visual_3d": "",
+    "faction": "Hive",
+    "faction_id": "demon",
+    "faction_image": "assets/factions/icons/hive_icon.png"
+  },
+  "Hydra": {
+    "unit_id": "hydra",
+    "icon": "assets/units/icons/hydra.png",
+    "visual_3d": "",
+    "faction": "Dungeon",
+    "faction_id": "dungeon",
+    "faction_image": "assets/factions/icons/dungeon_icon.png"
+  },
+  "Infernal Hydra": {
+    "unit_id": "hydra_upg_alt",
+    "icon": "assets/units/icons/hydra_upg_alt.png",
+    "visual_3d": "",
+    "faction": "Dungeon",
+    "faction_id": "dungeon",
+    "faction_image": "assets/factions/icons/dungeon_icon.png"
+  },
+  "Infernal Troglodyte": {
+    "unit_id": "trogl_upg",
+    "icon": "assets/units/icons/trogl_upg.png",
+    "visual_3d": "",
+    "faction": "Dungeon",
+    "faction_id": "dungeon",
+    "faction_image": "assets/factions/icons/dungeon_icon.png"
+  },
+  "Infiltrator": {
+    "unit_id": "assassin",
+    "icon": "assets/units/icons/assassin.png",
+    "visual_3d": "",
+    "faction": "Dungeon",
+    "faction_id": "dungeon",
+    "faction_image": "assets/factions/icons/dungeon_icon.png"
+  },
+  "Inquisitor": {
+    "unit_id": "inquisitor",
+    "icon": "assets/units/icons/inquisitor.png",
+    "visual_3d": "",
+    "faction": "Temple",
+    "faction_id": "human",
+    "faction_image": "assets/factions/icons/human_icon.png"
+  },
+  "Jasper Dancer": {
+    "unit_id": "blade_dancer_upg",
+    "icon": "assets/units/icons/blade_dancer_upg.png",
+    "visual_3d": "",
+    "faction": "Dungeon",
+    "faction_id": "dungeon",
+    "faction_image": "assets/factions/icons/dungeon_icon.png"
+  },
+  "Kennelmaster": {
+    "unit_id": "graverobber_upg_alt",
+    "icon": "assets/units/icons/graverobber_upg_alt.png",
+    "visual_3d": "",
+    "faction": "Necropolis",
+    "faction_id": "undead",
+    "faction_image": "assets/factions/icons/undead_icon.png"
+  },
+  "Kittenhorn": {
+    "unit_id": "kitten_horn",
+    "icon": "assets/units/icons/kitten_horn.png",
+    "visual_3d": "",
+    "faction": "Neutral",
+    "faction_id": "neutral",
+    "faction_image": "assets/factions/icons/unicorn.png"
+  },
+  "Lich": {
+    "unit_id": "lich",
+    "icon": "assets/units/icons/lich.png",
+    "visual_3d": "",
+    "faction": "Necropolis",
+    "faction_id": "undead",
+    "faction_image": "assets/factions/icons/undead_icon.png"
+  },
+  "Lich Dragon": {
+    "unit_id": "lich_dragon",
+    "icon": "assets/units/icons/lich_dragon.png",
+    "visual_3d": "",
+    "faction": "Neutral",
+    "faction_id": "neutral",
+    "faction_image": "assets/factions/icons/unicorn.png"
+  },
+  "Lightweaver": {
+    "unit_id": "lightweaver",
+    "icon": "assets/units/icons/lightweaver.png",
+    "visual_3d": "",
+    "faction": "Temple",
+    "faction_id": "human",
+    "faction_image": "assets/factions/icons/human_icon.png"
+  },
+  "Locust": {
+    "unit_id": "locust",
+    "icon": "assets/units/icons/locust.png",
+    "visual_3d": "",
+    "faction": "Hive",
+    "faction_id": "demon",
+    "faction_image": "assets/factions/icons/hive_icon.png"
+  },
+  "Maniacal Reaver": {
+    "unit_id": "godslayer_upg_alt",
+    "icon": "assets/units/icons/godslayer_upg_alt.png",
+    "visual_3d": "",
+    "faction": "Hive",
+    "faction_id": "demon",
+    "faction_image": "assets/factions/icons/hive_icon.png"
+  },
+  "Marksman": {
+    "unit_id": "crossbowman_upg_alt",
+    "icon": "assets/units/icons/crossbowman_upg_alt.png",
+    "visual_3d": "",
+    "faction": "Temple",
+    "faction_id": "human",
+    "faction_image": "assets/factions/icons/human_icon.png"
+  },
+  "Medusa": {
+    "unit_id": "medusa",
+    "icon": "assets/units/icons/medusa.png",
+    "visual_3d": "",
+    "faction": "Dungeon",
+    "faction_id": "dungeon",
+    "faction_image": "assets/factions/icons/dungeon_icon.png"
+  },
+  "Medusa Queen": {
+    "unit_id": "medusa_upg_alt",
+    "icon": "assets/units/icons/medusa_upg_alt.png",
+    "visual_3d": "",
+    "faction": "Dungeon",
+    "faction_id": "dungeon",
+    "faction_image": "assets/factions/icons/dungeon_icon.png"
+  },
+  "Medusa Sculptor": {
+    "unit_id": "medusa_upg",
+    "icon": "assets/units/icons/medusa_upg.png",
+    "visual_3d": "",
+    "faction": "Dungeon",
+    "faction_id": "dungeon",
+    "faction_image": "assets/factions/icons/dungeon_icon.png"
+  },
+  "Menacing Reaver": {
+    "unit_id": "godslayer_upg",
+    "icon": "assets/units/icons/godslayer_upg.png",
+    "visual_3d": "",
+    "faction": "Hive",
+    "faction_id": "demon",
+    "faction_image": "assets/factions/icons/hive_icon.png"
+  },
+  "Merchant of Death": {
+    "unit_id": "graverobber_upg",
+    "icon": "assets/units/icons/graverobber_upg.png",
+    "visual_3d": "",
+    "faction": "Necropolis",
+    "faction_id": "undead",
+    "faction_image": "assets/factions/icons/undead_icon.png"
+  },
+  "Minotaur": {
+    "unit_id": "minos",
+    "icon": "assets/units/icons/minos.png",
+    "visual_3d": "",
+    "faction": "Dungeon",
+    "faction_id": "dungeon",
+    "faction_image": "assets/factions/icons/dungeon_icon.png"
+  },
+  "Minotaur Lord": {
+    "unit_id": "minos_upg",
+    "icon": "assets/units/icons/minos_upg.png",
+    "visual_3d": "",
+    "faction": "Dungeon",
+    "faction_id": "dungeon",
+    "faction_image": "assets/factions/icons/dungeon_icon.png"
+  },
+  "Minotaur Vanguard": {
+    "unit_id": "minos_upg_alt",
+    "icon": "assets/units/icons/minos_upg_alt.png",
+    "visual_3d": "",
+    "faction": "Dungeon",
+    "faction_id": "dungeon",
+    "faction_image": "assets/factions/icons/dungeon_icon.png"
+  },
+  "Mist Qilin": {
+    "unit_id": "qilin_upg_alt",
+    "icon": "assets/units/icons/qilin_upg_alt.png",
+    "visual_3d": "",
+    "faction": "Grove",
+    "faction_id": "nature",
+    "faction_image": "assets/factions/icons/spring_icon.png"
+  },
+  "Mistress of Chains": {
+    "unit_id": "succubus_upg",
+    "icon": "assets/units/icons/succubus_upg.png",
+    "visual_3d": "",
+    "faction": "Schism",
+    "faction_id": "unfrozen",
+    "faction_image": "assets/factions/icons/unfrozen_icon.png"
+  },
+  "Mother Superior": {
+    "unit_id": "inquisitor_upg",
+    "icon": "assets/units/icons/inquisitor_upg.png",
+    "visual_3d": "",
+    "faction": "Temple",
+    "faction_id": "human",
+    "faction_image": "assets/factions/icons/human_icon.png"
+  },
+  "Murmurmancer": {
+    "unit_id": "druid_upg_alt",
+    "icon": "assets/units/icons/druid_upg_alt.png",
+    "visual_3d": "",
+    "faction": "Grove",
+    "faction_id": "nature",
+    "faction_image": "assets/factions/icons/spring_icon.png"
+  },
+  "Naiad": {
+    "unit_id": "aqualotl",
+    "icon": "assets/units/icons/aqualotl.png",
+    "visual_3d": "",
+    "faction": "Grove",
+    "faction_id": "nature",
+    "faction_image": "assets/factions/icons/spring_icon.png"
+  },
+  "Noble Cavalry": {
+    "unit_id": "sunlight_cavalry_upg",
+    "icon": "assets/units/icons/sunlight_cavalry_upg.png",
+    "visual_3d": "",
+    "faction": "Temple",
+    "faction_id": "human",
+    "faction_image": "assets/factions/icons/human_icon.png"
+  },
+  "Onyx Dancer": {
+    "unit_id": "blade_dancer",
+    "icon": "assets/units/icons/blade_dancer.png",
+    "visual_3d": "",
+    "faction": "Dungeon",
+    "faction_id": "dungeon",
+    "faction_image": "assets/factions/icons/dungeon_icon.png"
+  },
+  "Overgrown Locust": {
+    "unit_id": "locust_upg",
+    "icon": "assets/units/icons/locust_upg.png",
+    "visual_3d": "",
+    "faction": "Hive",
+    "faction_id": "demon",
+    "faction_image": "assets/factions/icons/hive_icon.png"
+  },
+  "Parasite": {
+    "unit_id": "trick_demon",
+    "icon": "assets/units/icons/trick_demon.png",
+    "visual_3d": "",
+    "faction": "Hive",
+    "faction_id": "demon",
+    "faction_image": "assets/factions/icons/hive_icon.png"
+  },
+  "Peasant": {
+    "unit_id": "peasant",
+    "icon": "assets/units/icons/peasant.png",
+    "visual_3d": "",
+    "faction": "Neutral",
+    "faction_id": "neutral",
+    "faction_image": "assets/factions/icons/unicorn.png"
+  },
+  "Pestilent Lich": {
+    "unit_id": "lich_upg",
+    "icon": "assets/units/icons/lich_upg.png",
+    "visual_3d": "",
+    "faction": "Necropolis",
+    "faction_id": "undead",
+    "faction_image": "assets/factions/icons/undead_icon.png"
+  },
+  "Phantasm": {
+    "unit_id": "flicker_upg_alt",
+    "icon": "assets/units/icons/flicker_upg_alt.png",
+    "visual_3d": "",
+    "faction": "Necropolis",
+    "faction_id": "undead",
+    "faction_image": "assets/factions/icons/undead_icon.png"
+  },
+  "Phoenix": {
+    "unit_id": "phoenix",
+    "icon": "assets/units/icons/phoenix.png",
+    "visual_3d": "",
+    "faction": "Grove",
+    "faction_id": "nature",
+    "faction_image": "assets/factions/icons/spring_icon.png"
+  },
+  "Pixie": {
+    "unit_id": "pixie",
+    "icon": "assets/units/icons/pixie.png",
+    "visual_3d": "",
+    "faction": "Neutral",
+    "faction_id": "neutral",
+    "faction_image": "assets/factions/icons/unicorn.png"
+  },
+  "Primal Remnant": {
+    "unit_id": "primal_remnant",
+    "icon": "assets/units/icons/primal_remnant.png",
+    "visual_3d": "",
+    "faction": "Neutral",
+    "faction_id": "neutral",
+    "faction_image": "assets/factions/icons/unicorn.png"
+  },
+  "Pyroboros": {
+    "unit_id": "olgoi_upg_alt",
+    "icon": "assets/units/icons/olgoi_upg_alt.png",
+    "visual_3d": "",
+    "faction": "Hive",
+    "faction_id": "demon",
+    "faction_image": "assets/factions/icons/hive_icon.png"
+  },
+  "Qilin": {
+    "unit_id": "qilin",
+    "icon": "assets/units/icons/qilin.png",
+    "visual_3d": "",
+    "faction": "Grove",
+    "faction_id": "nature",
+    "faction_image": "assets/factions/icons/spring_icon.png"
+  },
+  "Ravager Parasite": {
+    "unit_id": "trick_demon_upg_alt",
+    "icon": "assets/units/icons/trick_demon_upg_alt.png",
+    "visual_3d": "",
+    "faction": "Hive",
+    "faction_id": "demon",
+    "faction_image": "assets/factions/icons/hive_icon.png"
+  },
+  "Ra\u2019Shoth": {
+    "unit_id": "lesser_eldritch",
+    "icon": "assets/units/icons/lesser_eldritch.png",
+    "visual_3d": "",
+    "faction": "Schism",
+    "faction_id": "unfrozen",
+    "faction_image": "assets/factions/icons/unfrozen_icon.png"
+  },
+  "Reaver": {
+    "unit_id": "godslayer",
+    "icon": "assets/units/icons/godslayer.png",
+    "visual_3d": "",
+    "faction": "Hive",
+    "faction_id": "demon",
+    "faction_image": "assets/factions/icons/hive_icon.png"
+  },
+  "Red Dragon": {
+    "unit_id": "dragon_upg",
+    "icon": "assets/units/icons/dragon_upg.png",
+    "visual_3d": "",
+    "faction": "Neutral",
+    "faction_id": "neutral",
+    "faction_image": "assets/factions/icons/unicorn.png"
+  },
+  "Rift Arbitrator": {
+    "unit_id": "arbitrator_upg",
+    "icon": "assets/units/icons/arbitrator_upg.png",
+    "visual_3d": "",
+    "faction": "Schism",
+    "faction_id": "unfrozen",
+    "faction_image": "assets/factions/icons/unfrozen_icon.png"
+  },
+  "Sanguine Lich": {
+    "unit_id": "lich_upg_alt",
+    "icon": "assets/units/icons/lich_upg_alt.png",
+    "visual_3d": "",
+    "faction": "Necropolis",
+    "faction_id": "undead",
+    "faction_image": "assets/factions/icons/undead_icon.png"
+  },
+  "Scorpion": {
+    "unit_id": "jaw",
+    "icon": "assets/units/icons/jaw.png",
+    "visual_3d": "",
+    "faction": "Hive",
+    "faction_id": "demon",
+    "faction_image": "assets/factions/icons/hive_icon.png"
+  },
+  "Sentinel of Glory": {
+    "unit_id": "sentinel",
+    "icon": "assets/units/icons/sentinel.png",
+    "visual_3d": "",
+    "faction": "Neutral",
+    "faction_id": "neutral",
+    "faction_image": "assets/factions/icons/unicorn.png"
+  },
+  "Skeleton": {
+    "unit_id": "skeleton",
+    "icon": "assets/units/icons/skeleton.png",
+    "visual_3d": "",
+    "faction": "Necropolis",
+    "faction_id": "undead",
+    "faction_image": "assets/factions/icons/undead_icon.png"
+  },
+  "Skeleton Archer": {
+    "unit_id": "skeleton_upg_alt",
+    "icon": "assets/units/icons/skeleton_upg_alt.png",
+    "visual_3d": "",
+    "faction": "Necropolis",
+    "faction_id": "undead",
+    "faction_image": "assets/factions/icons/undead_icon.png"
+  },
+  "Skeleton Warrior": {
+    "unit_id": "skeleton_upg",
+    "icon": "assets/units/icons/skeleton_upg.png",
+    "visual_3d": "",
+    "faction": "Necropolis",
+    "faction_id": "undead",
+    "faction_image": "assets/factions/icons/undead_icon.png"
+  },
+  "Spelaean Scorpion": {
+    "unit_id": "jaw_upg_alt",
+    "icon": "assets/units/icons/jaw_upg_alt.png",
+    "visual_3d": "",
+    "faction": "Hive",
+    "faction_id": "demon",
+    "faction_image": "assets/factions/icons/hive_icon.png"
+  },
+  "Sporemancer": {
+    "unit_id": "druid_upg",
+    "icon": "assets/units/icons/druid_upg.png",
+    "visual_3d": "",
+    "faction": "Grove",
+    "faction_id": "nature",
+    "faction_image": "assets/factions/icons/spring_icon.png"
+  },
+  "Starchild": {
+    "unit_id": "star_child",
+    "icon": "assets/units/icons/star_child.png",
+    "visual_3d": "",
+    "faction": "Neutral",
+    "faction_id": "neutral",
+    "faction_image": "assets/factions/icons/unicorn.png"
+  },
+  "Stinger": {
+    "unit_id": "wasp_upg_alt",
+    "icon": "assets/units/icons/wasp_upg_alt.png",
+    "visual_3d": "",
+    "faction": "Hive",
+    "faction_id": "demon",
+    "faction_image": "assets/factions/icons/hive_icon.png"
+  },
+  "Stinging Ra\u2019Shoth": {
+    "unit_id": "lesser_eldritch_upg",
+    "icon": "assets/units/icons/lesser_eldritch_upg.png",
+    "visual_3d": "",
+    "faction": "Schism",
+    "faction_id": "unfrozen",
+    "faction_image": "assets/factions/icons/unfrozen_icon.png"
+  },
+  "Sun Herald": {
+    "unit_id": "lightweaver_upg_alt",
+    "icon": "assets/units/icons/lightweaver_upg_alt.png",
+    "visual_3d": "",
+    "faction": "Temple",
+    "faction_id": "human",
+    "faction_image": "assets/factions/icons/human_icon.png"
+  },
+  "Sunspear Cavalry": {
+    "unit_id": "sunlight_cavalry_upg_alt",
+    "icon": "assets/units/icons/sunlight_cavalry_upg_alt.png",
+    "visual_3d": "",
+    "faction": "Temple",
+    "faction_id": "human",
+    "faction_image": "assets/factions/icons/human_icon.png"
+  },
+  "Sun\u2019s Aegis": {
+    "unit_id": "esquire_upg_alt",
+    "icon": "assets/units/icons/esquire_upg_alt.png",
+    "visual_3d": "",
+    "faction": "Temple",
+    "faction_id": "human",
+    "faction_image": "assets/factions/icons/human_icon.png"
+  },
+  "Swordsman": {
+    "unit_id": "esquire",
+    "icon": "assets/units/icons/esquire.png",
+    "visual_3d": "",
+    "faction": "Temple",
+    "faction_id": "human",
+    "faction_image": "assets/factions/icons/human_icon.png"
+  },
+  "Temple Griffin": {
+    "unit_id": "griffin_upg",
+    "icon": "assets/units/icons/griffin_upg.png",
+    "visual_3d": "",
+    "faction": "Temple",
+    "faction_id": "human",
+    "faction_image": "assets/factions/icons/human_icon.png"
+  },
+  "Thunder Qilin": {
+    "unit_id": "qilin_upg",
+    "icon": "assets/units/icons/qilin_upg.png",
+    "visual_3d": "",
+    "faction": "Grove",
+    "faction_id": "nature",
+    "faction_image": "assets/factions/icons/spring_icon.png"
+  },
+  "Toxic Troglodyte": {
+    "unit_id": "trogl_upg_alt",
+    "icon": "assets/units/icons/trogl_upg_alt.png",
+    "visual_3d": "",
+    "faction": "Dungeon",
+    "faction_id": "dungeon",
+    "faction_image": "assets/factions/icons/dungeon_icon.png"
+  },
+  "Troglodyte": {
+    "unit_id": "trogl",
+    "icon": "assets/units/icons/trogl.png",
+    "visual_3d": "",
+    "faction": "Dungeon",
+    "faction_id": "dungeon",
+    "faction_image": "assets/factions/icons/dungeon_icon.png"
+  },
+  "Undead Pet": {
+    "unit_id": "pet",
+    "icon": "assets/units/icons/pet.png",
+    "visual_3d": "",
+    "faction": "Necropolis",
+    "faction_id": "undead",
+    "faction_image": "assets/factions/icons/undead_icon.png"
+  },
+  "Unicorn": {
+    "unit_id": "unicorn",
+    "icon": "assets/units/icons/unicorn.png",
+    "visual_3d": "",
+    "faction": "Neutral",
+    "faction_id": "neutral",
+    "faction_image": "assets/factions/icons/unicorn.png"
+  },
+  "Unspeakable Shoth": {
+    "unit_id": "eldritch_flyer_upg",
+    "icon": "assets/units/icons/eldritch_flyer_upg.png",
+    "visual_3d": "",
+    "faction": "Schism",
+    "faction_id": "unfrozen",
+    "faction_image": "assets/factions/icons/unfrozen_icon.png"
+  },
+  "Unthinkable Shoth": {
+    "unit_id": "eldritch_flyer_upg_alt",
+    "icon": "assets/units/icons/eldritch_flyer_upg_alt.png",
+    "visual_3d": "",
+    "faction": "Schism",
+    "faction_id": "unfrozen",
+    "faction_image": "assets/factions/icons/unfrozen_icon.png"
+  },
+  "Vampire": {
+    "unit_id": "vampire",
+    "icon": "assets/units/icons/vampire.png",
+    "visual_3d": "",
+    "faction": "Necropolis",
+    "faction_id": "undead",
+    "faction_image": "assets/factions/icons/undead_icon.png"
+  },
+  "Vampire Lord": {
+    "unit_id": "vampire_upg",
+    "icon": "assets/units/icons/vampire_upg.png",
+    "visual_3d": "",
+    "faction": "Necropolis",
+    "faction_id": "undead",
+    "faction_image": "assets/factions/icons/undead_icon.png"
+  },
+  "Vampire Scholar": {
+    "unit_id": "vampire_upg_alt",
+    "icon": "assets/units/icons/vampire_upg_alt.png",
+    "visual_3d": "",
+    "faction": "Necropolis",
+    "faction_id": "undead",
+    "faction_image": "assets/factions/icons/undead_icon.png"
+  },
+  "Vernal Naiad": {
+    "unit_id": "aqualotl_upg",
+    "icon": "assets/units/icons/aqualotl_upg.png",
+    "visual_3d": "",
+    "faction": "Grove",
+    "faction_id": "nature",
+    "faction_image": "assets/factions/icons/spring_icon.png"
+  },
+  "Vine Iriyad": {
+    "unit_id": "ent",
+    "icon": "assets/units/icons/ent.png",
+    "visual_3d": "",
+    "faction": "Grove",
+    "faction_id": "nature",
+    "faction_image": "assets/factions/icons/spring_icon.png"
+  },
+  "Volcanic Scorpion": {
+    "unit_id": "jaw_upg",
+    "icon": "assets/units/icons/jaw_upg.png",
+    "visual_3d": "",
+    "faction": "Hive",
+    "faction_id": "demon",
+    "faction_image": "assets/factions/icons/hive_icon.png"
+  },
+  "Votary": {
+    "unit_id": "unfrozen_cultist_upg_alt",
+    "icon": "assets/units/icons/unfrozen_cultist_upg_alt.png",
+    "visual_3d": "",
+    "faction": "Schism",
+    "faction_id": "unfrozen",
+    "faction_image": "assets/factions/icons/unfrozen_icon.png"
+  },
+  "Warden Parasite": {
+    "unit_id": "trick_demon_upg",
+    "icon": "assets/units/icons/trick_demon_upg.png",
+    "visual_3d": "",
+    "faction": "Hive",
+    "faction_id": "demon",
+    "faction_image": "assets/factions/icons/hive_icon.png"
+  },
+  "Waurms": {
+    "unit_id": "olgoi",
+    "icon": "assets/units/icons/olgoi.png",
+    "visual_3d": "",
+    "faction": "Hive",
+    "faction_id": "demon",
+    "faction_image": "assets/factions/icons/hive_icon.png"
+  },
+  "Wight": {
+    "unit_id": "flicker",
+    "icon": "assets/units/icons/flicker.png",
+    "visual_3d": "",
+    "faction": "Necropolis",
+    "faction_id": "undead",
+    "faction_image": "assets/factions/icons/undead_icon.png"
+  },
+  "Worldwatcher": {
+    "unit_id": "mech_guard",
+    "icon": "assets/units/icons/mech_guard.png",
+    "visual_3d": "",
+    "faction": "Neutral",
+    "faction_id": "neutral",
+    "faction_image": "assets/factions/icons/unicorn.png"
+  },
+  "Wraith": {
+    "unit_id": "flicker_upg",
+    "icon": "assets/units/icons/flicker_upg.png",
+    "visual_3d": "",
+    "faction": "Necropolis",
+    "faction_id": "undead",
+    "faction_image": "assets/factions/icons/undead_icon.png"
+  }
+}
