@@ -1,15 +1,17 @@
 # OldenEra QOL 0.1
 
-A modular Windows desktop assistant for Olden Era quality-of-life workflows.
+Модульный Windows-ассистент для удобных сценариев в Olden Era.
 
-The first module, **Unit Placer**, captures the screen, scans a selected top unit-card panel, reads squad quantities with Tesseract OCR, maps panel order onto a user-calibrated numbered battlefield grid, and performs drag-and-drop movement while logging uncertain cases.
+[тут находится удобная вики сайт по игре HOMM Heroes Olden Era](https://heroes-olden-era.com/ru)
 
-Additional setup modules are included:
+Первый модуль, **Unit Placer**, делает снимок экрана, сканирует выбранную верхнюю панель карточек юнитов, считывает количество отрядов через Tesseract OCR, сопоставляет порядок карточек с откалиброванной пользователем нумерованной сеткой поля боя и выполняет перетаскивание юнитов, записывая неоднозначные случаи в лог.
 
-- **Placement Grid**: a draggable complete-cell deployment hex board with visible left-to-right cell numbers for arranging unit icons, swapping occupied cells, tagging units as max/any quantity, and saving named setup templates with unit icons.
-- **Units**: an editable unit database imported from `E:\Project\OldenEraWiki`, keyed by English unit name.
+Также включены дополнительные модули настройки:
 
-## Quick Start
+- **Placement Grid**: перетаскиваемая гекс-сетка всей зоны расстановки с видимой нумерацией ячеек слева направо. Позволяет раскладывать иконки юнитов, менять занятые ячейки местами, помечать юнитов как max/any по количеству и сохранять именованные шаблоны расстановки с иконками юнитов.
+- **Units**: редактируемая база юнитов, импортированная из `E:\Project\OldenEraWiki` и привязанная к английским названиям юнитов.
+
+## Быстрый старт
 
 ```powershell
 python -m venv .venv
@@ -18,22 +20,22 @@ pip install -e ".[dev]"
 python -m oldenera_qol
 ```
 
-Install Tesseract OCR separately and set its path in the app settings if it is not on `PATH`.
+Установите Tesseract OCR отдельно и укажите путь к нему в настройках приложения, если он не доступен через `PATH`.
 
-## Project Layout
+## Структура проекта
 
-- `src/oldenera_qol/app`: PySide6 shell and screens
-- `src/oldenera_qol/config`: TOML settings and hotkeys
-- `src/oldenera_qol/hotkeys`: global hotkey manager
-- `src/oldenera_qol/modules`: module interface and Unit Placer module
-- `src/oldenera_qol/units`: imported unit database, editor models, and wiki importer
-- `src/oldenera_qol/vision`: capture, template matching, OCR
-- `src/oldenera_qol/automation`: drag execution helpers
-- `src/oldenera_qol/profiles`: visual setup profiles
+- `src/oldenera_qol/app`: оболочка PySide6 и экраны приложения
+- `src/oldenera_qol/config`: TOML-настройки и горячие клавиши
+- `src/oldenera_qol/hotkeys`: менеджер глобальных горячих клавиш
+- `src/oldenera_qol/modules`: интерфейс модулей и модуль Unit Placer
+- `src/oldenera_qol/units`: импортированная база юнитов, модели редактора и импортер из вики
+- `src/oldenera_qol/vision`: захват изображения, поиск шаблонов и OCR
+- `src/oldenera_qol/automation`: вспомогательные функции для выполнения перетаскивания
+- `src/oldenera_qol/profiles`: профили визуальной настройки
 
-## Unit Data
+## Данные юнитов
 
-The unit database lives at `data/units.json`. Each top-level object key is the English unit name. Each record stores:
+База юнитов находится в `data/units.json`. Каждый ключ верхнего уровня - английское название юнита. Каждая запись хранит:
 
 - `unit_id`
 - `icon`
@@ -42,24 +44,28 @@ The unit database lives at `data/units.json`. Each top-level object key is the E
 - `faction_id`
 - `faction_image`
 
-`visual_3d` starts empty and can be filled from the Units screen when you provide the 3D visual images.
+Поле `visual_3d` изначально пустое. Его можно заполнить на экране Units, когда будут доступны 3D-изображения юнитов.
 
-When running from source, settings, profiles, and editable data stay in the project folders. When running the bundled `.exe`, the app seeds its defaults into `%APPDATA%\OldenEraQOL` and reads/writes user data there so updates do not overwrite saved settings or profiles.
+При запуске из исходников настройки, профили и редактируемые данные остаются в папках проекта. При запуске собранного `.exe` приложение копирует значения по умолчанию в `%APPDATA%\OldenEraQOL` и читает/записывает пользовательские данные там, чтобы обновления не перезаписывали сохраненные настройки и профили.
 
-## Unit Placer Flow
+## Сценарий Unit Placer
 
-Unit Placer uses the app's numbered grid as the source of truth. The Cell Map tab and Placement Grid both show the same complete-cell deployment strip, numbered left-to-right across each row. The player clicks cells on the game screen in that order so the saved coordinates match the app's template data. The top unit panel is selected with **Select Unit Area** and scanned left-to-right to determine which units are present. **Save Panel** stores the cropped unit panel under `profiles/unit_panels/` so it can be reused when realtime capture is unavailable. Disable **Realtime unit panel** and select a saved panel to make Test Scan and Move Units scan that saved image instead of the live screen. **Select Grid Cells** displays the same numbered reference grid on the right side of the overlay while the user clicks. Placement templates use the same numbered grid cells as destinations.
+Unit Placer использует нумерованную сетку приложения как источник истины. Вкладка Cell Map и Placement Grid показывают одну и ту же полную полосу ячеек зоны расстановки, пронумерованную слева направо в каждой строке. Игрок нажимает ячейки на экране игры в этом порядке, чтобы сохраненные координаты совпадали с данными шаблонов приложения.
 
-## Tests
+Верхняя панель юнитов выбирается через **Select Unit Area** и сканируется слева направо, чтобы определить, какие юниты присутствуют. **Save Panel** сохраняет обрезанную панель юнитов в `profiles/unit_panels/`, чтобы ее можно было использовать, когда захват в реальном времени недоступен. Отключите **Realtime unit panel** и выберите сохраненную панель, чтобы Test Scan и Move Units сканировали сохраненное изображение вместо живого экрана.
+
+**Select Grid Cells** показывает ту же нумерованную эталонную сетку справа в оверлее, пока пользователь кликает по ячейкам. Шаблоны расстановки используют те же номера ячеек как цели перемещения.
+
+## Тесты
 
 ```powershell
 pytest
 ```
 
-## Build EXE
+## Сборка EXE
 
 ```powershell
 .\build-exe.bat
 ```
 
-The built executable is written to `dist\OldenEraQOL\OldenEraQOL.exe`.
+Собранный исполняемый файл будет записан в `dist\OldenEraQOL\OldenEraQOL.exe`.
