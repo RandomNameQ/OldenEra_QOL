@@ -22,6 +22,7 @@ datas = [
     (str(project_root / "config" / "settings.toml"), "config"),
     (str(project_root / "data" / "units.json"), "data"),
 ]
+datas += collect_tree(project_root / "data" / "locales", "data/locales")
 datas += collect_tree(project_root / "assets", "assets")
 datas += collect_tree(
     project_root / "profiles",

@@ -53,7 +53,10 @@ class WindowController:
             import win32gui
         except ImportError:
             return False
-        win32gui.SetForegroundWindow(handle)
+        try:
+            win32gui.SetForegroundWindow(handle)
+        except Exception:
+            return False
         return True
 
     def foreground_handle(self) -> int | None:

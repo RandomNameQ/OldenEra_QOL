@@ -1,0 +1,23 @@
+{
+  "nav": {
+    "dashboard": "ダッシュボード",
+    "unitPlacer": "ユニット配置",
+    "placementGrid": "配置グリッド",
+    "units": "ユニット",
+    "hotkeys": "ホットキー",
+    "settings": "設定",
+    "logs": "ログ"
+  },
+  "settings": {
+    "title": "設定",
+    "language": "言語"
+  },
+  "units": {
+    "title": "ユニット",
+    "faction": "勢力"
+  },
+  "placementGrid": {
+    "title": "配置グリッド",
+    "units": "ユニット"
+  }
+}

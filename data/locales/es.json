@@ -1,0 +1,23 @@
+{
+  "nav": {
+    "dashboard": "Panel",
+    "unitPlacer": "Colocador",
+    "placementGrid": "Cuadrícula",
+    "units": "Unidades",
+    "hotkeys": "Atajos",
+    "settings": "Ajustes",
+    "logs": "Registros"
+  },
+  "settings": {
+    "title": "Ajustes",
+    "language": "Idioma"
+  },
+  "units": {
+    "title": "Unidades",
+    "faction": "Facción"
+  },
+  "placementGrid": {
+    "title": "Cuadrícula de colocación",
+    "units": "Unidades"
+  }
+}

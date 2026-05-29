@@ -1,0 +1,23 @@
+{
+  "nav": {
+    "dashboard": "Übersicht",
+    "unitPlacer": "Einheitenplatzierung",
+    "placementGrid": "Aufstellungsraster",
+    "units": "Einheiten",
+    "hotkeys": "Tastenkürzel",
+    "settings": "Einstellungen",
+    "logs": "Protokolle"
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "language": "Sprache"
+  },
+  "units": {
+    "title": "Einheiten",
+    "faction": "Fraktion"
+  },
+  "placementGrid": {
+    "title": "Aufstellungsraster",
+    "units": "Einheiten"
+  }
+}

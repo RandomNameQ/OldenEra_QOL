@@ -79,6 +79,7 @@ class CalibratedUnitPlacerService:
         app_root: Path,
         ocr: QuantityOcr,
         log: LogSink | None = None,
+        use_any_for_unmatched: bool = False,
     ) -> None:
         self.units = units
         self.app_root = app_root
@@ -88,6 +89,7 @@ class CalibratedUnitPlacerService:
             units=self.units,
             app_root=self.app_root,
             ocr=self.ocr,
+            use_any_for_unmatched=use_any_for_unmatched,
         )
         self._scan_lock = Lock()
 

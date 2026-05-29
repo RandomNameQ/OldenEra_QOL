@@ -1,4 +1,10 @@
 from types import SimpleNamespace
+import os
+import sys
+
+os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+
+from PySide6.QtWidgets import QApplication
 
 from oldenera_qol.automation.window import WindowController
 from oldenera_qol.hotkeys.manager import HotkeyManager, _to_pynput
@@ -8,6 +14,7 @@ from oldenera_qol.modules.registry import ModuleRegistry
 def test_hotkey_conversion_uses_pynput_modifier_format() -> None:
     assert _to_pynput("ctrl+alt+f1") == "<ctrl>+<alt>+<f1>"
     assert _to_pynput("ctrl+x") == "<ctrl>+x"
+    assert _to_pynput("f3") == "<f3>"
 
 
 def test_hotkey_manager_returns_validation_issues_for_duplicates() -> None:
@@ -17,6 +24,39 @@ def test_hotkey_manager_returns_validation_issues_for_duplicates() -> None:
 
     assert issues
     assert "duplicates" in issues[0]
+
+
+def test_hotkey_manager_dispatches_callbacks_through_qt_event_loop(monkeypatch) -> None:
+    app = QApplication.instance() or QApplication([])
+    captured_bindings = {}
+
+    class FakeGlobalHotKeys:
+        def __init__(self, bindings):
+            captured_bindings.update(bindings)
+
+        def start(self) -> None:
+            pass
+
+        def stop(self) -> None:
+            pass
+
+    monkeypatch.setitem(
+        sys.modules,
+        "pynput",
+        SimpleNamespace(keyboard=SimpleNamespace(GlobalHotKeys=FakeGlobalHotKeys)),
+    )
+    manager = HotkeyManager()
+    called: list[str] = []
+
+    issues = manager.register({"start_unit_placer": "f3"}, {"start_unit_placer": lambda: called.append("move")})
+    captured_bindings["<f3>"]()
+
+    assert issues == []
+    assert called == []
+
+    app.processEvents()
+
+    assert called == ["move"]
 
 
 def test_module_registry_registers_and_retrieves_module() -> None:

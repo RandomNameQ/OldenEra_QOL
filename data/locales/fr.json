@@ -1,0 +1,23 @@
+{
+  "nav": {
+    "dashboard": "Tableau de bord",
+    "unitPlacer": "Placement",
+    "placementGrid": "Grille",
+    "units": "Unités",
+    "hotkeys": "Raccourcis",
+    "settings": "Paramètres",
+    "logs": "Journaux"
+  },
+  "settings": {
+    "title": "Paramètres",
+    "language": "Langue"
+  },
+  "units": {
+    "title": "Unités",
+    "faction": "Faction"
+  },
+  "placementGrid": {
+    "title": "Grille de placement",
+    "units": "Unités"
+  }
+}

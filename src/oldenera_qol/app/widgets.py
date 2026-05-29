@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+import ctypes
+from ctypes import wintypes
 
 from PySide6.QtCore import QPointF, QRect, Qt, QTimer, Signal
 from PySide6.QtGui import QColor, QBrush, QCursor, QKeySequence, QPainter, QPen, QPixmap, QPolygonF
@@ -21,6 +23,73 @@ from PySide6.QtWidgets import (
 
 
 OverlayAction = tuple[str, Callable[[], None], str, str]
+
+_WM_KEYDOWN = 0x0100
+_WM_SYSKEYDOWN = 0x0104
+_VK_ESCAPE = 0x1B
+_WH_KEYBOARD_LL = 13
+
+
+class _KbdLlHookStruct(ctypes.Structure):
+    _fields_ = [
+        ("vkCode", wintypes.DWORD),
+        ("scanCode", wintypes.DWORD),
+        ("flags", wintypes.DWORD),
+        ("time", wintypes.DWORD),
+        ("dwExtraInfo", ctypes.c_void_p),
+    ]
+
+
+class _EscapeKeyBlocker:
+    def __init__(self, on_escape: Callable[[], None]) -> None:
+        self._on_escape = on_escape
+        self._hook = None
+        self._callback = None
+        self._user32 = None
+
+    def start(self) -> bool:
+        if self._hook is not None:
+            return True
+        try:
+            user32 = ctypes.windll.user32
+            kernel32 = ctypes.windll.kernel32
+        except AttributeError:
+            return False
+        callback_type = ctypes.WINFUNCTYPE(
+            ctypes.c_long,
+            ctypes.c_int,
+            wintypes.WPARAM,
+            wintypes.LPARAM,
+        )
+        self._user32 = user32
+        self._callback = callback_type(self._handle_event)
+        module_handle = kernel32.GetModuleHandleW(None)
+        self._hook = user32.SetWindowsHookExW(
+            _WH_KEYBOARD_LL,
+            self._callback,
+            module_handle,
+            0,
+        )
+        return bool(self._hook)
+
+    def stop(self) -> None:
+        if self._hook is None or self._user32 is None:
+            self._hook = None
+            self._callback = None
+            return
+        self._user32.UnhookWindowsHookEx(self._hook)
+        self._hook = None
+        self._callback = None
+
+    def _handle_event(self, code: int, w_param, l_param) -> int:
+        if code >= 0 and int(w_param) in (_WM_KEYDOWN, _WM_SYSKEYDOWN):
+            event = ctypes.cast(l_param, ctypes.POINTER(_KbdLlHookStruct)).contents
+            if int(event.vkCode) == _VK_ESCAPE:
+                QTimer.singleShot(0, self._on_escape)
+                return 1
+        if self._user32 is None:
+            return 0
+        return self._user32.CallNextHookEx(self._hook, code, w_param, l_param)
 
 
 class FloatingActionOverlay(QWidget):
@@ -74,7 +143,7 @@ class FloatingActionOverlay(QWidget):
             button.setMinimumHeight(32)
             if role:
                 button.setObjectName(role)
-            button.clicked.connect(callback)
+            button.clicked.connect(lambda _checked=False, action=callback: self._trigger_action(action))
             panel_layout.addWidget(button)
         layout.addWidget(self.panel)
         self.panel.setVisible(False)
@@ -111,6 +180,14 @@ class FloatingActionOverlay(QWidget):
             QFrame#OverlayPanel QPushButton {
                 text-align: left;
                 padding: 6px 9px;
+            }
+            QFrame#OverlayPanel QPushButton#SuccessButton {
+                background: #1f8f4d;
+                border-color: #26d65b;
+                font-weight: 600;
+            }
+            QFrame#OverlayPanel QPushButton#SuccessButton:hover {
+                background: #26a85b;
             }
             """
         )
@@ -159,6 +236,10 @@ class FloatingActionOverlay(QWidget):
         self.adjustSize()
         self.reposition()
 
+    def _trigger_action(self, action: Callable[[], None]) -> None:
+        self._set_expanded(False)
+        action()
+
     def _collapse_if_mouse_left(self) -> None:
         if not self.rect().contains(self.mapFromGlobal(QCursor.pos())):
             self._set_expanded(False)
@@ -181,17 +262,65 @@ class LogPanel(QFrame):
 
 class HotkeyCaptureEdit(QLineEdit):
     captured = Signal(str)
+    _CAPTURE_TEXT = "Press a key or shortcut..."
+    _MODIFIER_KEYS = {
+        Qt.Key.Key_Control,
+        Qt.Key.Key_Shift,
+        Qt.Key.Key_Alt,
+        Qt.Key.Key_Meta,
+    }
 
     def __init__(self, value: str = "") -> None:
         super().__init__(value)
-        self.setPlaceholderText("Press a shortcut")
+        self._previous_value = value
+        self._capturing = False
+        self.setPlaceholderText("Click and press a key or shortcut")
+
+    def focusInEvent(self, event) -> None:
+        super().focusInEvent(event)
+        self._start_capture()
+
+    def focusOutEvent(self, event) -> None:
+        if self._capturing:
+            self._restore_previous()
+        super().focusOutEvent(event)
+
+    def mousePressEvent(self, event) -> None:
+        super().mousePressEvent(event)
+        self._start_capture()
 
     def keyPressEvent(self, event) -> None:
-        sequence = QKeySequence(event.modifiers() | event.key()).toString().lower()
+        if event.key() == Qt.Key.Key_Escape:
+            self._restore_previous()
+            self.clearFocus()
+            event.accept()
+            return
+        if event.key() in self._MODIFIER_KEYS:
+            event.accept()
+            return
+        sequence = QKeySequence(event.keyCombination()).toString().lower()
         if sequence:
             sequence = sequence.replace(", ", "+").replace("meta", "win")
             self.setText(sequence)
+            self._previous_value = sequence
+            self._capturing = False
             self.captured.emit(sequence)
+            self.clearFocus()
+            event.accept()
+            return
+        super().keyPressEvent(event)
+
+    def _start_capture(self) -> None:
+        if self._capturing:
+            return
+        self._previous_value = self.text()
+        self._capturing = True
+        self.setText(self._CAPTURE_TEXT)
+        self.selectAll()
+
+    def _restore_previous(self) -> None:
+        self._capturing = False
+        self.setText(self._previous_value)
 
 
 class ScreenshotCanvas(QGraphicsView):
@@ -344,6 +473,7 @@ class SelectionOverlay(QWidget):
         self.start: tuple[int, int] | None = None
         self.current: tuple[int, int] | None = None
         self.pending_point: tuple[int, int] | None = None
+        self._escape_blocker = _EscapeKeyBlocker(self._cancel_selection)
         self.setMouseTracking(True)
         self.setWindowFlags(
             Qt.WindowType.FramelessWindowHint
@@ -351,6 +481,7 @@ class SelectionOverlay(QWidget):
             | Qt.WindowType.WindowStaysOnTopHint
         )
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+        self.setAttribute(Qt.WidgetAttribute.WA_ShowWithoutActivating)
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
 
     def reference_labels(self) -> list[str]:
@@ -406,10 +537,22 @@ class SelectionOverlay(QWidget):
 
     def keyPressEvent(self, event) -> None:
         if event.key() in (Qt.Key.Key_Escape, Qt.Key.Key_Return, Qt.Key.Key_Enter):
-            self.finished.emit()
-            self.close()
+            self._cancel_selection()
+            event.accept()
             return
         super().keyPressEvent(event)
+
+    def showEvent(self, event) -> None:
+        self._escape_blocker.start()
+        super().showEvent(event)
+
+    def closeEvent(self, event) -> None:
+        self._escape_blocker.stop()
+        super().closeEvent(event)
+
+    def _cancel_selection(self) -> None:
+        self.finished.emit()
+        self.close()
 
     def paintEvent(self, event) -> None:
         painter = QPainter(self)

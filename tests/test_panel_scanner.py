@@ -4,6 +4,7 @@ import pytest
 from oldenera_qol.modules.unit_placer.panel_scanner import (
     PanelUnitScanner,
     _quantity_font,
+    _read_quantity_by_cv,
     split_panel_cards,
 )
 from oldenera_qol.units.repository import UnitRepository
@@ -89,6 +90,52 @@ def test_panel_unit_scanner_reuses_loaded_icon_templates(tmp_path, monkeypatch) 
     assert read_calls == [str(icon_path)]
 
 
+def test_panel_unit_scanner_skips_pseudo_any_icon_templates(tmp_path, monkeypatch) -> None:
+    import cv2
+    import numpy as np
+
+    archer_icon_path = tmp_path / "archer.png"
+    any_icon_path = tmp_path / "any.png"
+    archer_icon_path.write_bytes(b"fake")
+    any_icon_path.write_bytes(b"fake")
+    scanner = PanelUnitScanner(
+        units={
+            "ANY": UnitRecord(
+                name="ANY",
+                unit_id="any",
+                icon="any.png",
+                visual_3d="",
+                faction="",
+                faction_id="",
+                faction_image="",
+            ),
+            "Archer": UnitRecord(
+                name="Archer",
+                unit_id="archer",
+                icon="archer.png",
+                visual_3d="",
+                faction="",
+                faction_id="",
+                faction_image="",
+            ),
+        },
+        app_root=tmp_path,
+        ocr=object(),
+    )
+    read_calls: list[str] = []
+
+    def fake_imread(path, _mode):
+        read_calls.append(path)
+        return np.ones((8, 8, 3), dtype=np.uint8)
+
+    monkeypatch.setattr(cv2, "imread", fake_imread)
+
+    templates = scanner._unit_icon_templates()
+
+    assert [name for name, _icon, _mask in templates] == ["Archer"]
+    assert read_calls == [str(archer_icon_path)]
+
+
 def test_panel_unit_scanner_ignores_transparent_icon_backgrounds(tmp_path) -> None:
     icon_path = tmp_path / "icon.png"
     icon = Image.new("RGBA", (20, 20), (0, 0, 0, 0))
@@ -144,6 +191,51 @@ def test_panel_unit_scanner_reuses_unchanged_panel_scan(tmp_path, monkeypatch) -
     assert (first[1].card_rect.x, first[1].card_rect.width) == (20, 20)
     assert len(match_calls) == 2
     assert ocr.calls == 2
+
+
+def test_panel_unit_scanner_can_treat_unmatched_cards_as_any_without_icon_matching(
+    tmp_path,
+    monkeypatch,
+) -> None:
+    class FakeOcr:
+        def read_quantity(self, _image):
+            return OcrResult(value=42, text="42", confidence=0.9)
+
+    scanner = PanelUnitScanner(
+        units={},
+        app_root=tmp_path,
+        ocr=FakeOcr(),
+        use_any_for_unmatched=True,
+    )
+    monkeypatch.setattr(
+        scanner,
+        "_match_unit",
+        lambda _image: (_ for _ in ()).throw(AssertionError("ANY scan must not match icons")),
+    )
+
+    detections = scanner.scan_panel_image(Image.new("RGB", (40, 20), "white"), expected_count=2)
+
+    assert [detection.unit_name for detection in detections] == ["ANY", "ANY"]
+    assert [detection.quantity for detection in detections] == [42, 42]
+
+
+def test_quantity_reader_ignores_top_edge_frame_artifacts() -> None:
+    image = Image.new("RGB", (85, 31), "black")
+    draw = ImageDraw.Draw(image)
+    draw.rectangle((16, 0, 19, 4), fill="white")
+    draw.rectangle((62, 0, 68, 4), fill="white")
+    font = _quantity_font(11)
+    bbox = draw.textbbox((0, 0), "1", font=font)
+    draw.text(
+        ((85 - (bbox[2] - bbox[0])) // 2, 9 - bbox[1]),
+        "1",
+        fill="white",
+        font=font,
+    )
+
+    result = _read_quantity_by_cv(image)
+
+    assert result.value == 1
 
 
 def test_panel_unit_scanner_keeps_unit_detection_when_tesseract_is_missing(tmp_path, monkeypatch) -> None:

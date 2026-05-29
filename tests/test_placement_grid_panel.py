@@ -6,11 +6,13 @@ from pathlib import Path
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QIcon
 from PySide6.QtTest import QTest
 from PySide6.QtWidgets import QApplication, QGraphicsTextItem, QPushButton, QSpinBox
 
-from oldenera_qol.modules.placement_grid.panel import PlacementGridPanel
+from oldenera_qol.modules.placement_grid.panel import PlacementGridPanel, TemplateIconDialog
 from oldenera_qol.modules.placement_grid.repository import PlacementTemplateRepository
+from oldenera_qol.units.models import UnitRecord
 from oldenera_qol.units.repository import UnitRepository
 
 
@@ -250,6 +252,41 @@ def test_template_controls_include_delete_and_unit_icon_picker(tmp_path: Path) -
     assert "Choose Template Image" not in button_texts
 
 
+def test_template_icon_dialog_uses_localized_unit_names(tmp_path: Path) -> None:
+    app = _app()
+    dialog = TemplateIconDialog(
+        {
+            "Angel": UnitRecord(
+                name="Angel",
+                unit_id="angel",
+                icon="assets/units/icons/angel.png",
+                visual_3d="",
+                faction="Temple",
+                faction_id="temple",
+                faction_image="",
+                localized_names={"ru": "Ангел"},
+            )
+        },
+        Path.cwd(),
+        lambda _path: QIcon(),
+        locale="ru",
+    )
+    try:
+        _flush_events(app)
+
+        assert dialog.unit_list.item(0).text() == "Ангел"
+        assert dialog.unit_list.item(0).toolTip() == "Angel"
+
+        dialog.search.setText("angel")
+        _flush_events(app)
+
+        assert dialog.unit_list.count() == 1
+        assert dialog.unit_list.item(0).text() == "Ангел"
+    finally:
+        dialog.close()
+        _flush_events(app)
+
+
 def test_cell_numbers_are_drawn_on_grid(tmp_path: Path) -> None:
     panel = _panel(tmp_path)
 
@@ -269,3 +306,9 @@ def test_cell_numbers_are_drawn_on_grid(tmp_path: Path) -> None:
         (1, 0),
         (1, 1),
     ]
+
+
+def test_any_unit_is_first_in_placement_grid_unit_list(tmp_path: Path) -> None:
+    panel = _panel(tmp_path)
+
+    assert panel.unit_list.item(0).text() == "ANY"

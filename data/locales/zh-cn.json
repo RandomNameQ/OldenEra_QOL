@@ -1,0 +1,23 @@
+{
+  "nav": {
+    "dashboard": "仪表板",
+    "unitPlacer": "单位布置",
+    "placementGrid": "布阵网格",
+    "units": "单位",
+    "hotkeys": "快捷键",
+    "settings": "设置",
+    "logs": "日志"
+  },
+  "settings": {
+    "title": "设置",
+    "language": "语言"
+  },
+  "units": {
+    "title": "单位",
+    "faction": "阵营"
+  },
+  "placementGrid": {
+    "title": "布阵网格",
+    "units": "单位"
+  }
+}

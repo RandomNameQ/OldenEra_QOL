@@ -8,7 +8,7 @@ from typing import Any
 
 from PIL import Image, ImageDraw, ImageFont
 
-from oldenera_qol.units.models import UnitRecord
+from oldenera_qol.units.models import PSEUDO_ANY_UNIT_NAME, UnitRecord, is_pseudo_any_unit_name
 from oldenera_qol.vision.models import Rect
 from oldenera_qol.vision.ocr import OcrResult, QuantityOcr, is_tesseract_unavailable_error
 
@@ -50,11 +50,13 @@ class PanelUnitScanner:
         app_root: Path,
         ocr: QuantityOcr,
         match_threshold: float = 0.5,
+        use_any_for_unmatched: bool = False,
     ) -> None:
         self.units = units
         self.app_root = app_root
         self.ocr = ocr
         self.match_threshold = match_threshold
+        self.use_any_for_unmatched = use_any_for_unmatched
         self._icon_cache: list[tuple[str, Any, Any | None]] | None = None
         self._resized_icon_cache: dict[tuple[str, int, int], list[tuple[Any, Any | None]]] = {}
         self._last_scan_signature: tuple[tuple[int, int], str, int, bytes] | None = None
@@ -87,12 +89,17 @@ class PanelUnitScanner:
 
         detections: list[PanelUnitDetection] = []
         for card in split_panel_cards(panel_image, expected_count):
-            match_result = self._match_unit(_unit_match_crop(card.image))
+            if self.use_any_for_unmatched and not self.units:
+                match_result = (PSEUDO_ANY_UNIT_NAME, 0.0, ())
+            else:
+                match_result = self._match_unit(_unit_match_crop(card.image))
             if len(match_result) == 2:
                 unit_name, unit_confidence = match_result
                 match_candidates = ()
             else:
                 unit_name, unit_confidence, match_candidates = match_result
+            if unit_name == "unknown" and self.use_any_for_unmatched:
+                unit_name = PSEUDO_ANY_UNIT_NAME
             quantity_crop = _quantity_crop(card.image)
             ocr_result = self._read_quantity(quantity_crop)
             detections.append(
@@ -173,6 +180,8 @@ class PanelUnitScanner:
 
         icons: list[tuple[str, Any, Any | None]] = []
         for name, record in self.units.items():
+            if is_pseudo_any_unit_name(name):
+                continue
             icon_path = self.app_root / record.icon
             if not icon_path.exists():
                 continue
@@ -443,7 +452,9 @@ def _filter_digit_components(threshold):
     )
     filtered = np.zeros_like(threshold)
     for component_index in range(1, component_count):
-        _x, _y, _width, height, area = stats[component_index]
+        _x, y, _width, height, area = stats[component_index]
+        if y <= 1:
+            continue
         if area >= 5 and height >= 5:
             filtered[labels == component_index] = 255
     return filtered

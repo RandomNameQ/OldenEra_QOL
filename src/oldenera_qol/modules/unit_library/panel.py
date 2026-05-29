@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from PySide6.QtCore import Qt
 from PySide6.QtGui import QIcon, QPixmap
 from PySide6.QtWidgets import (
     QFileDialog,
@@ -18,6 +19,7 @@ from PySide6.QtWidgets import (
 )
 
 from oldenera_qol.app.widgets import LogPanel, make_header
+from oldenera_qol.localization import DEFAULT_LOCALE, Translator
 from oldenera_qol.units.importer import WikiUnitImporter
 from oldenera_qol.units.models import UnitRecord
 from oldenera_qol.units.repository import UnitRepository
@@ -35,11 +37,20 @@ class UnitLibraryPanel(QWidget):
     id = "unit_library"
     name = "Units"
 
-    def __init__(self, app_root: Path, repository: UnitRepository, log) -> None:
+    def __init__(
+        self,
+        app_root: Path,
+        repository: UnitRepository,
+        log,
+        translator: Translator | None = None,
+        locale: str = DEFAULT_LOCALE,
+    ) -> None:
         super().__init__()
         self.app_root = app_root
         self.repository = repository
         self.log = log
+        self.translator = translator
+        self.locale = locale
         self.units: dict[str, UnitRecord] = {}
         self.selected_unit_name: str | None = None
         self._icon_cache: dict[str, QIcon] = {}
@@ -67,18 +78,18 @@ class UnitLibraryPanel(QWidget):
         layout = QVBoxLayout(self)
         layout.addWidget(
             make_header(
-                "Units",
-                "Import wiki unit data, edit unit fields, and add 3D visual references later.",
+                self.tr("units.title"),
+                self.tr("units.subtitle"),
             )
         )
 
         toolbar = QHBoxLayout()
-        import_button = QPushButton("Import From Wiki")
+        import_button = QPushButton(self.tr("units.importFromWiki"))
         import_button.setObjectName("PrimaryButton")
         import_button.clicked.connect(self.import_from_wiki)
-        save_button = QPushButton("Save Unit")
+        save_button = QPushButton(self.tr("units.saveUnit"))
         save_button.clicked.connect(self.save_current_unit)
-        choose_button = QPushButton("Choose File For Field")
+        choose_button = QPushButton(self.tr("units.chooseFileForField"))
         choose_button.clicked.connect(self.choose_file_for_selected_field)
         toolbar.addWidget(import_button)
         toolbar.addWidget(save_button)
@@ -100,16 +111,16 @@ class UnitLibraryPanel(QWidget):
             ("3D visual", self.visual_value),
             ("Faction image", self.faction_image_value),
         ]:
-            detail_layout.addWidget(QLabel(label))
+            detail_layout.addWidget(QLabel(self._field_label(label)))
             detail_layout.addWidget(widget)
-        detail_layout.addWidget(QLabel("Preview"))
+        detail_layout.addWidget(QLabel(self.tr("units.preview")))
         detail_layout.addWidget(self.preview)
         detail_layout.addStretch(1)
         splitter.addWidget(detail)
         splitter.setStretchFactor(0, 1)
         splitter.setStretchFactor(1, 2)
         layout.addWidget(splitter, 1)
-        layout.addWidget(QLabel("Unit data log"))
+        layout.addWidget(QLabel(self.tr("units.log")))
         layout.addWidget(self.log_panel)
 
         self.unit_list.currentItemChanged.connect(self._unit_selection_changed)
@@ -120,22 +131,25 @@ class UnitLibraryPanel(QWidget):
         self._preview_cache = {}
         self.unit_list.clear()
         for name, record in self.units.items():
-            item = QListWidgetItem(name)
+            item = QListWidgetItem(record.display_name(self.locale))
+            item.setData(Qt.ItemDataRole.UserRole, name)
+            if record.display_name(self.locale) != name:
+                item.setToolTip(name)
             icon_path = self._absolute_path(record.icon)
             if icon_path.exists():
                 item.setIcon(self._icon_for_path(icon_path))
             self.unit_list.addItem(item)
-        self.log_panel.append(f"Loaded {len(self.units)} unit records")
+        self.log_panel.append(self.tr("units.loaded", count=len(self.units)))
 
     def import_from_wiki(self) -> None:
         wiki_root = Path("E:/Project/OldenEraWiki")
         try:
             units = WikiUnitImporter(wiki_root, self.app_root).import_units(self.repository)
         except Exception as exc:
-            self.log_panel.append(f"Wiki import failed: {exc}")
+            self.log_panel.append(self.tr("units.importFailed", error=exc))
             return
         self.refresh_units()
-        self.log_panel.append(f"Imported {len(units)} units from {wiki_root}")
+        self.log_panel.append(self.tr("units.imported", count=len(units), path=wiki_root))
 
     def save_current_unit(self) -> None:
         if self.selected_unit_name is None:
@@ -152,7 +166,7 @@ class UnitLibraryPanel(QWidget):
         self.units[self.selected_unit_name] = record
         self.repository.save(self.units)
         self.refresh_units()
-        self.log_panel.append(f"Saved {record.name}")
+        self.log_panel.append(self.tr("units.saved", name=record.display_name(self.locale)))
 
     def choose_file_for_selected_field(self) -> None:
         if self.selected_unit_name is None:
@@ -179,7 +193,7 @@ class UnitLibraryPanel(QWidget):
         if current is None:
             self.selected_unit_name = None
             return
-        self.selected_unit_name = current.text()
+        self.selected_unit_name = str(current.data(Qt.ItemDataRole.UserRole) or current.text())
         record = self.units[self.selected_unit_name]
         self.name_value.setText(record.name)
         self.unit_id_value.setText(record.unit_id)
@@ -189,6 +203,23 @@ class UnitLibraryPanel(QWidget):
         self.visual_value.setText(record.visual_3d)
         self.faction_image_value.setText(record.faction_image)
         self._update_preview(record.icon)
+
+    def _field_label(self, label: str) -> str:
+        keys = {
+            "Name": "units.name",
+            "Unit ID": "units.unitId",
+            "Faction": "units.faction",
+            "Faction ID": "units.factionId",
+            "Icon": "units.icon",
+            "3D visual": "units.visual3d",
+            "Faction image": "units.factionImage",
+        }
+        return self.tr(keys[label])
+
+    def tr(self, key: str, **values: object) -> str:
+        if self.translator is None:
+            return key
+        return self.translator.t(key, **values)
 
     def _update_preview(self, path: str) -> None:
         absolute = self._absolute_path(path)

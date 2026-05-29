@@ -1,0 +1,23 @@
+{
+  "nav": {
+    "dashboard": "Pano",
+    "unitPlacer": "Birim yerleşimi",
+    "placementGrid": "Yerleşim ızgarası",
+    "units": "Birimler",
+    "hotkeys": "Kısayollar",
+    "settings": "Ayarlar",
+    "logs": "Günlükler"
+  },
+  "settings": {
+    "title": "Ayarlar",
+    "language": "Dil"
+  },
+  "units": {
+    "title": "Birimler",
+    "faction": "Grup"
+  },
+  "placementGrid": {
+    "title": "Yerleşim ızgarası",
+    "units": "Birimler"
+  }
+}

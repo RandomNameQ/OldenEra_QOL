@@ -1,0 +1,118 @@
+{
+  "app": {
+    "title": "OldenEra QOL"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "unitPlacer": "Unit Placer",
+    "placementGrid": "Placement Grid",
+    "units": "Units",
+    "hotkeys": "Hotkeys",
+    "settings": "Settings",
+    "logs": "Logs"
+  },
+  "status": {
+    "windowNotSelected": "Window: not selected",
+    "windowSelected": "Window: {title}",
+    "profile": "Profile: {profile}",
+    "automation": "Automation: {state}",
+    "automationIdle": "Automation: idle",
+    "tesseractPath": "Tesseract: PATH",
+    "tesseractCustom": "Tesseract: custom path"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Select a game window, configure visual profiles, and run modules from the sidebar.",
+    "unitPlacer": "Unit Placer - detect unit stacks, read quantities, and drag them to configured slots",
+    "placementGrid": "Placement Grid - build the full hex board and move unit icons around it",
+    "units": "Units - import and edit unit JSON data, including future 3D visual references",
+    "moreModules": "More modules can be added through the module registry"
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Configure localization, OCR, and automation timing.",
+    "language": "Language",
+    "tesseractPath": "Tesseract executable path",
+    "activeProfile": "Active profile name"
+  },
+  "hotkeys": {
+    "title": "Hotkeys",
+    "subtitle": "Click a shortcut field and press a new combination.",
+    "action": "Action",
+    "hotkey": "Hotkey"
+  },
+  "logs": {
+    "title": "Logs",
+    "subtitle": "Module activity, skipped actions, and errors."
+  },
+  "overlay": {
+    "openApp": "Open App",
+    "openAppTooltip": "Show the main OldenEra QOL window.",
+    "selectGrid": "Select Grid",
+    "selectGridTooltip": "Select battlefield cells.",
+    "selectUnitArea": "Select Unit Area",
+    "selectUnitAreaTooltip": "Select the unit-card panel area.",
+    "savePanel": "Save Panel",
+    "savePanelTooltip": "Save the current unit area as a reusable panel image.",
+    "moveUnit": "Move Unit",
+    "moveUnitTooltip": "Run the selected placement template."
+  },
+  "units": {
+    "title": "Units",
+    "subtitle": "Import wiki unit data, edit unit fields, and add 3D visual references later.",
+    "importFromWiki": "Import From Wiki",
+    "saveUnit": "Save Unit",
+    "chooseFileForField": "Choose File For Field",
+    "name": "Name",
+    "unitId": "Unit ID",
+    "faction": "Faction",
+    "factionId": "Faction ID",
+    "icon": "Icon",
+    "visual3d": "3D visual",
+    "factionImage": "Faction image",
+    "preview": "Preview",
+    "log": "Unit data log",
+    "loaded": "Loaded {count} unit records",
+    "importFailed": "Wiki import failed: {error}",
+    "imported": "Imported {count} units from {path}",
+    "saved": "Saved {name}"
+  },
+  "placementGrid": {
+    "title": "Placement Grid",
+    "subtitle": "Select a unit, click a hex to place it, then drag icons to move or swap them.",
+    "quantityRule": "Quantity rule",
+    "updateSelected": "Update Selected",
+    "refreshUnits": "Refresh Units",
+    "clearGrid": "Clear Grid",
+    "selectedNone": "Selected: none",
+    "selectedUnit": "Selected: {unit} at row {row}, col {col}",
+    "placementTemplates": "Placement templates",
+    "new": "New",
+    "save": "Save",
+    "rename": "Rename",
+    "delete": "Delete",
+    "chooseIcon": "Choose Icon",
+    "units": "Units",
+    "searchUnits": "Search units by name",
+    "cell": "Cell {index}"
+  },
+  "unitPlacer": {
+    "title": "Unit Placer",
+    "subtitle": "Calibrate the panel and grid, scan unit order, then move units into place.",
+    "placementSetup": "Placement Setup",
+    "cellMap": "Cell Map",
+    "unitPanel": "Unit Panel",
+    "preview": "Preview",
+    "moduleLog": "Module log",
+    "cellMapSubtitle": "Use these numbers as the reference when selecting battlefield cells in the game.",
+    "cellMapDescription": "The app assigns these numbers to the hex grid. Click cells on the game screen in this order so the saved coordinates match the Placement Grid template.",
+    "unitPanelSubtitle": "Saved unit panels can be reused when realtime panel capture is unavailable.",
+    "savedPanels": "Saved panels",
+    "refresh": "Refresh",
+    "select": "Select",
+    "delete": "Delete",
+    "refreshSavedPanelsTooltip": "Reload saved unit panels from disk.",
+    "selectSavedPanelTooltip": "Use the highlighted saved panel for saved-panel mode.",
+    "deleteSavedPanelTooltip": "Delete the highlighted saved panel and its image."
+  }
+}

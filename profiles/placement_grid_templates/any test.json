@@ -1,0 +1,55 @@
+{
+  "name": "any test",
+  "image_path": "assets/units/icons/any.svg",
+  "units": [
+    {
+      "unit_name": "Aureate Dancer",
+      "row": 9,
+      "col": 0,
+      "quantity": 1,
+      "quantity_mode": "max"
+    },
+    {
+      "unit_name": "ANY",
+      "row": 8,
+      "col": 0,
+      "quantity": 1,
+      "quantity_mode": "max"
+    },
+    {
+      "unit_name": "ANY",
+      "row": 10,
+      "col": 0,
+      "quantity": 1,
+      "quantity_mode": "max"
+    },
+    {
+      "unit_name": "ANY",
+      "row": 10,
+      "col": 1,
+      "quantity": 1,
+      "quantity_mode": "any"
+    },
+    {
+      "unit_name": "ANY",
+      "row": 9,
+      "col": 1,
+      "quantity": 1,
+      "quantity_mode": "any"
+    },
+    {
+      "unit_name": "ANY",
+      "row": 8,
+      "col": 1,
+      "quantity": 1,
+      "quantity_mode": "any"
+    },
+    {
+      "unit_name": "ANY",
+      "row": 7,
+      "col": 1,
+      "quantity": 1,
+      "quantity_mode": "any"
+    }
+  ]
+}

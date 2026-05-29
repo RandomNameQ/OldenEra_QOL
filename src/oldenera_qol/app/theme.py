@@ -32,6 +32,14 @@ QPushButton#PrimaryButton {
     border-color: #2f7cf6;
     font-weight: 600;
 }
+QPushButton#SuccessButton {
+    background: #1f8f4d;
+    border-color: #26d65b;
+    font-weight: 600;
+}
+QPushButton#SuccessButton:hover {
+    background: #26a85b;
+}
 QPushButton#DangerButton {
     background: #a63d4a;
     border-color: #bd4a58;

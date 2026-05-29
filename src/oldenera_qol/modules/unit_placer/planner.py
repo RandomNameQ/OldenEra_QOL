@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+from collections import Counter
 from dataclasses import dataclass
+from dataclasses import replace
 
 from oldenera_qol.modules.placement_grid.models import PlacedUnit, PlacementTemplate
 from oldenera_qol.modules.unit_placer.calibration import UnitPlacerCalibration
 from oldenera_qol.modules.unit_placer.panel_scanner import PanelUnitDetection
 from oldenera_qol.profiles.models import DestinationSlot, UnitProfile
+from oldenera_qol.units.models import PSEUDO_ANY_UNIT_NAME, is_pseudo_any_unit_name
 from oldenera_qol.vision.models import Rect, UnitDetection
 
 
@@ -83,7 +86,11 @@ def build_calibrated_move_plan(
     if not calibration.grid_cells:
         logs.append("Numbered grid calibration is missing")
 
-    ordered_detections = sorted(detections, key=lambda item: item.panel_index)
+    ordered_detections = _resolve_template_candidate_detections(
+        sorted(detections, key=lambda item: item.panel_index),
+        template,
+        logs,
+    )
     relaxed_quantity_units = _units_with_relaxed_quantity_matching(
         ordered_detections,
         template,
@@ -142,6 +149,8 @@ def build_calibrated_move_plan(
         )
         logs.append(f"Planned {label}")
 
+    actions = _swap_aware_action_order(actions, logs)
+
     for index, detection in enumerate(ordered_detections):
         if index in used_detection_indexes or detection.unit_name == "unknown":
             continue
@@ -151,6 +160,163 @@ def build_calibrated_move_plan(
         )
 
     return MovePlan(actions=actions, log_messages=logs)
+
+
+def _swap_aware_action_order(
+    actions: list[MoveAction],
+    logs: list[str],
+) -> list[MoveAction]:
+    current_sources = {index: action.source for index, action in enumerate(actions)}
+    occupied_by_source = {
+        action.source: index
+        for index, action in enumerate(actions)
+    }
+    ordered: list[MoveAction] = []
+
+    for index, action in enumerate(actions):
+        current_source = current_sources[index]
+        if current_source == action.target:
+            continue
+
+        displaced_index = occupied_by_source.get(action.target)
+        if occupied_by_source.get(current_source) == index:
+            occupied_by_source.pop(current_source)
+        if displaced_index is not None and displaced_index != index:
+            current_sources[displaced_index] = current_source
+            occupied_by_source[current_source] = displaced_index
+        current_sources[index] = action.target
+        occupied_by_source[action.target] = index
+        ordered.append(replace(action, source=current_source))
+
+    return ordered
+
+
+def _resolve_template_candidate_detections(
+    detections: list[PanelUnitDetection],
+    template: PlacementTemplate,
+    logs: list[str],
+) -> list[PanelUnitDetection]:
+    expected_counts = Counter(
+        unit.unit_name
+        for unit in template.units
+        if unit.unit_name and not is_pseudo_any_unit_name(unit.unit_name)
+    )
+    if not expected_counts:
+        return detections
+    if any(is_pseudo_any_unit_name(unit.unit_name) for unit in template.units):
+        return _resolve_named_detections_for_any_template(detections, expected_counts, logs)
+
+    resolved = list(detections)
+    detected_counts = Counter(
+        detection.unit_name
+        for detection in resolved
+        if detection.unit_name != "unknown"
+    )
+    missing_units = [
+        unit_name
+        for unit_name, expected_count in expected_counts.items()
+        for _index in range(max(0, expected_count - detected_counts.get(unit_name, 0)))
+    ]
+
+    for missing_unit in missing_units:
+        candidates: list[tuple[float, float, int, PanelUnitDetection]] = []
+        for index, detection in enumerate(resolved):
+            if detection.unit_name == missing_unit or detection.unit_name == "unknown":
+                continue
+            if detected_counts[detection.unit_name] <= expected_counts.get(detection.unit_name, 0):
+                continue
+            candidate_score = _candidate_score(detection, missing_unit)
+            if candidate_score is None:
+                continue
+            score_gap = detection.confidence - candidate_score
+            if candidate_score < 0.45 or score_gap > 0.14:
+                continue
+            candidates.append((candidate_score, -score_gap, -index, detection))
+
+        if not candidates:
+            continue
+
+        candidate_score, _negative_gap, negative_index, detection = max(candidates)
+        index = -negative_index
+        previous_unit = detection.unit_name
+        resolved[index] = replace(
+            detection,
+            unit_name=missing_unit,
+            confidence=candidate_score,
+        )
+        detected_counts[previous_unit] -= 1
+        detected_counts[missing_unit] += 1
+        logs.append(
+            f"Resolved panel card {detection.panel_index + 1} as {missing_unit} "
+            f"from candidates; primary was {previous_unit}"
+        )
+
+    return resolved
+
+
+def _resolve_named_detections_for_any_template(
+    detections: list[PanelUnitDetection],
+    expected_counts: Counter[str],
+    logs: list[str],
+) -> list[PanelUnitDetection]:
+    selected: dict[int, tuple[str, float]] = {}
+    used_indexes: set[int] = set()
+    for unit_name, expected_count in expected_counts.items():
+        for _index in range(expected_count):
+            candidates: list[tuple[float, int, int, PanelUnitDetection]] = []
+            for detection_index, detection in enumerate(detections):
+                if detection_index in used_indexes:
+                    continue
+                score = _candidate_score(detection, unit_name)
+                if score is None and detection.unit_name == unit_name:
+                    score = detection.confidence
+                if score is None or score < 0.45:
+                    continue
+                quantity = detection.quantity if detection.quantity is not None else -1
+                candidates.append((score, quantity, -detection_index, detection))
+            if not candidates:
+                continue
+            score, _quantity, negative_index, detection = max(candidates)
+            detection_index = -negative_index
+            selected[detection_index] = (unit_name, score)
+            used_indexes.add(detection_index)
+            if detection.unit_name != unit_name:
+                logs.append(
+                    f"Resolved panel card {detection.panel_index + 1} as {unit_name} "
+                    f"from candidates; primary was {detection.unit_name}"
+                )
+
+    resolved: list[PanelUnitDetection] = []
+    for index, detection in enumerate(detections):
+        selected_unit = selected.get(index)
+        if selected_unit is not None:
+            unit_name, score = selected_unit
+            resolved.append(
+                replace(
+                    detection,
+                    unit_name=unit_name,
+                    confidence=score,
+                )
+            )
+            continue
+        if detection.unit_name in expected_counts or detection.unit_name == "unknown":
+            resolved.append(
+                replace(
+                    detection,
+                    unit_name=PSEUDO_ANY_UNIT_NAME,
+                    confidence=0.0,
+                )
+            )
+            continue
+        resolved.append(detection)
+    return resolved
+
+
+def _candidate_score(detection: PanelUnitDetection, unit_name: str) -> float | None:
+    for candidate_name, score in detection.match_candidates:
+        if candidate_name == unit_name:
+            return score
+    return None
 
 
 def _assign_calibrated_detections(
@@ -180,9 +346,21 @@ def _assign_calibrated_detections(
 def _prioritized_calibrated_placements(units: list[PlacedUnit]) -> list[PlacedUnit]:
     ordered = sorted(
         enumerate(units),
-        key=lambda item: (_quantity_priority(item[1]), item[0]),
+        key=lambda item: (
+            _placement_priority(item[1]),
+            item[0],
+        ),
     )
     return [unit for _index, unit in ordered]
+
+
+def _placement_priority(unit: PlacedUnit) -> tuple[int, int]:
+    mode_priority = _quantity_priority(unit)
+    if is_pseudo_any_unit_name(unit.unit_name):
+        if unit.normalized_mode() == "max":
+            return (1, mode_priority)
+        return (3, mode_priority)
+    return (0, mode_priority)
 
 
 def _quantity_priority(unit: PlacedUnit) -> int:
@@ -200,6 +378,22 @@ def _candidate_detections(
     placed: PlacedUnit,
     relaxed_quantity: bool,
 ) -> list[tuple[int, PanelUnitDetection]]:
+    if is_pseudo_any_unit_name(placed.unit_name):
+        candidates = [
+            (index, detection)
+            for index, detection in enumerate(ordered_detections)
+            if index not in used_detection_indexes
+            and detection.unit_name != "unknown"
+            and (
+                placed.normalized_mode() == "max"
+                or relaxed_quantity
+                or placed.matches_quantity(detection.quantity)
+            )
+        ]
+        if placed.normalized_mode() != "max":
+            return candidates
+        return _sort_max_stack_candidates(candidates)
+
     candidates = [
         (index, detection)
         for index, detection in enumerate(ordered_detections)
@@ -213,6 +407,12 @@ def _candidate_detections(
     ]
     if placed.normalized_mode() != "max":
         return candidates
+    return _sort_max_stack_candidates(candidates)
+
+
+def _sort_max_stack_candidates(
+    candidates: list[tuple[int, PanelUnitDetection]],
+) -> list[tuple[int, PanelUnitDetection]]:
     return sorted(
         candidates,
         key=lambda item: (
@@ -229,7 +429,11 @@ def _units_with_relaxed_quantity_matching(
     ordered_detections: list[PanelUnitDetection],
     template: PlacementTemplate,
 ) -> set[str]:
-    unit_names = {placed.unit_name for placed in template.units}
+    unit_names = {
+        placed.unit_name
+        for placed in template.units
+        if not is_pseudo_any_unit_name(placed.unit_name)
+    }
     relaxed: set[str] = set()
     for unit_name in unit_names:
         placements = [placed for placed in template.units if placed.unit_name == unit_name]

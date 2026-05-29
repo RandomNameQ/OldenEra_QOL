@@ -4,6 +4,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 import tomllib
 
+from oldenera_qol.localization import DEFAULT_LOCALE, normalize_locale
+
 
 DEFAULT_HOTKEYS = {
     "start_unit_placer": "ctrl+alt+f1",
@@ -22,6 +24,7 @@ class AutomationSettings:
 @dataclass(slots=True)
 class AppSettings:
     theme: str = "dark"
+    locale: str = DEFAULT_LOCALE
     tesseract_cmd: str = ""
     active_profile: str = "default"
     last_placement_template: str = ""
@@ -64,6 +67,7 @@ class SettingsService:
         automation = data.get("automation", {})
         return AppSettings(
             theme=str(data.get("theme", "dark")),
+            locale=normalize_locale(str(data.get("locale", DEFAULT_LOCALE))),
             tesseract_cmd=str(data.get("tesseract_cmd", "")),
             active_profile=str(data.get("active_profile", "default")),
             last_placement_template=str(data.get("last_placement_template", "")),
@@ -82,6 +86,7 @@ class SettingsService:
         self.path.parent.mkdir(parents=True, exist_ok=True)
         content = [
             f'theme = "{settings.theme}"',
+            f'locale = "{normalize_locale(settings.locale)}"',
             f'tesseract_cmd = "{settings.tesseract_cmd}"',
             f'active_profile = "{settings.active_profile}"',
             f'last_placement_template = "{settings.last_placement_template}"',

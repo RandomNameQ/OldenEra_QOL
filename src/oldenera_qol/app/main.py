@@ -7,6 +7,7 @@ import sys
 from PySide6.QtCore import QRect, QTimer, Qt
 from PySide6.QtWidgets import (
     QApplication,
+    QComboBox,
     QFrame,
     QHBoxLayout,
     QLabel,
@@ -36,6 +37,7 @@ from oldenera_qol.automation.mouse import EmergencyStop
 from oldenera_qol.automation.window import WindowController, WindowInfo
 from oldenera_qol.config.settings import AppSettings, SettingsService, validate_hotkeys
 from oldenera_qol.hotkeys.manager import HotkeyManager
+from oldenera_qol.localization import Translator, supported_locales
 from oldenera_qol.modules.placement_grid.panel import PlacementGridPanel
 from oldenera_qol.modules.placement_grid.repository import PlacementTemplateRepository
 from oldenera_qol.modules.unit_library.panel import UnitLibraryPanel
@@ -56,6 +58,8 @@ class MainWindow(QMainWindow):
         self.resize(1280, 820)
         self.settings_service = SettingsService(ROOT / "config" / "settings.toml")
         self.settings = self.settings_service.load()
+        self.translator = Translator(ROOT / "data" / "locales", self.settings.locale)
+        self.setWindowTitle(self.tr("app.title"))
         self.profile_repository = ProfileRepository(ROOT / "profiles")
         self.unit_repository = UnitRepository(ROOT / "data" / "units.json")
         self.placement_template_repository = PlacementTemplateRepository(
@@ -65,14 +69,21 @@ class MainWindow(QMainWindow):
         self.hotkey_manager = HotkeyManager()
         self.emergency_stop = EmergencyStop()
         self.selected_window: WindowInfo | None = None
+        self.automation_state = "idle"
 
         self.log_panel = LogPanel()
-        self.stack = QStackedWidget()
-        self.status_window = self._status_label("Window: not selected")
-        self.status_profile = self._status_label(f"Profile: {self.settings.active_profile}")
-        self.status_ocr = self._status_label(self._ocr_status_text())
-        self.status_state = self._status_label("Automation: idle")
+        self._create_module_panels()
+        self._create_status_labels()
 
+        self._build_layout()
+        self.control_overlay = FloatingActionOverlay(
+            self._overlay_actions(),
+            self._overlay_anchor_rect,
+        )
+        QTimer.singleShot(0, self.control_overlay.start)
+        self._register_hotkeys()
+
+    def _create_module_panels(self) -> None:
         self.unit_placer_panel = UnitPlacerPanel(
             settings=self.settings,
             settings_service=self.settings_service,
@@ -85,11 +96,14 @@ class MainWindow(QMainWindow):
             placement_template_repository=self.placement_template_repository,
             unit_repository=self.unit_repository,
             app_root=ROOT,
+            translator=self.translator,
         )
         self.unit_library_panel = UnitLibraryPanel(
             app_root=ROOT,
             repository=self.unit_repository,
             log=self.log,
+            translator=self.translator,
+            locale=self.settings.locale,
         )
         self.placement_grid_panel = PlacementGridPanel(
             app_root=ROOT,
@@ -97,19 +111,31 @@ class MainWindow(QMainWindow):
             template_repository=self.placement_template_repository,
             log=self.log,
             on_templates_changed=self.unit_placer_panel.refresh_placement_templates,
+            translator=self.translator,
+            locale=self.settings.locale,
         )
         self.unit_placer_panel.refresh_placement_templates()
 
-        self._build_layout()
-        self.control_overlay = FloatingActionOverlay(
-            self._overlay_actions(),
-            self._overlay_anchor_rect,
+    def _create_status_labels(self) -> None:
+        window_text = (
+            self.tr("status.windowSelected", title=self.selected_window.title)
+            if self.selected_window is not None
+            else self.tr("status.windowNotSelected")
         )
-        QTimer.singleShot(0, self.control_overlay.start)
-        self._register_hotkeys()
+        self.status_window = self._status_label(window_text)
+        self.status_profile = self._status_label(
+            self.tr("status.profile", profile=self.settings.active_profile)
+        )
+        self.status_ocr = self._status_label(self._ocr_status_text())
+        self.status_state = self._status_label(
+            self.tr("status.automation", state=self.automation_state)
+            if self.automation_state != "idle"
+            else self.tr("status.automationIdle")
+        )
 
     def _build_layout(self) -> None:
         central = QWidget()
+        self.stack = QStackedWidget()
         root_layout = QHBoxLayout(central)
         root_layout.setContentsMargins(0, 0, 0, 0)
         root_layout.setSpacing(0)
@@ -119,17 +145,17 @@ class MainWindow(QMainWindow):
         sidebar.setFixedWidth(210)
         sidebar_layout = QVBoxLayout(sidebar)
         sidebar_layout.setContentsMargins(14, 18, 14, 18)
-        brand = QLabel("OldenEra QOL")
+        brand = QLabel(self.tr("app.title"))
         brand.setObjectName("Title")
         sidebar_layout.addWidget(brand)
         sidebar_layout.addSpacing(12)
-        sidebar_layout.addWidget(nav_button("Dashboard", lambda: self.stack.setCurrentIndex(0)))
-        sidebar_layout.addWidget(nav_button("Unit Placer", lambda: self.stack.setCurrentIndex(1)))
-        sidebar_layout.addWidget(nav_button("Placement Grid", lambda: self.stack.setCurrentIndex(2)))
-        sidebar_layout.addWidget(nav_button("Units", lambda: self.stack.setCurrentIndex(3)))
-        sidebar_layout.addWidget(nav_button("Hotkeys", lambda: self.stack.setCurrentIndex(4)))
-        sidebar_layout.addWidget(nav_button("Settings", lambda: self.stack.setCurrentIndex(5)))
-        sidebar_layout.addWidget(nav_button("Logs", lambda: self.stack.setCurrentIndex(6)))
+        sidebar_layout.addWidget(nav_button(self.tr("nav.dashboard"), lambda: self.stack.setCurrentIndex(0)))
+        sidebar_layout.addWidget(nav_button(self.tr("nav.unitPlacer"), lambda: self.stack.setCurrentIndex(1)))
+        sidebar_layout.addWidget(nav_button(self.tr("nav.placementGrid"), lambda: self.stack.setCurrentIndex(2)))
+        sidebar_layout.addWidget(nav_button(self.tr("nav.units"), lambda: self.stack.setCurrentIndex(3)))
+        sidebar_layout.addWidget(nav_button(self.tr("nav.hotkeys"), lambda: self.stack.setCurrentIndex(4)))
+        sidebar_layout.addWidget(nav_button(self.tr("nav.settings"), lambda: self.stack.setCurrentIndex(5)))
+        sidebar_layout.addWidget(nav_button(self.tr("nav.logs"), lambda: self.stack.setCurrentIndex(6)))
         sidebar_layout.addStretch(1)
 
         content = QWidget()
@@ -177,17 +203,17 @@ class MainWindow(QMainWindow):
         layout = QVBoxLayout(page)
         layout.addWidget(
             make_header(
-                "Dashboard",
-                "Select a game window, configure visual profiles, and run modules from the sidebar.",
+                self.tr("dashboard.title"),
+                self.tr("dashboard.subtitle"),
             )
         )
         modules = QListWidget()
         modules.addItems(
             [
-                "Unit Placer - detect unit stacks, read quantities, and drag them to configured slots",
-                "Placement Grid - build the full hex board and move unit icons around it",
-                "Units - import and edit unit JSON data, including future 3D visual references",
-                "More modules can be added through the module registry",
+                self.tr("dashboard.unitPlacer"),
+                self.tr("dashboard.placementGrid"),
+                self.tr("dashboard.units"),
+                self.tr("dashboard.moreModules"),
             ]
         )
         layout.addWidget(modules)
@@ -197,9 +223,9 @@ class MainWindow(QMainWindow):
     def _hotkeys_page(self) -> QWidget:
         page = QWidget()
         layout = QVBoxLayout(page)
-        layout.addWidget(make_header("Hotkeys", "Click a shortcut field and press a new combination."))
+        layout.addWidget(make_header(self.tr("hotkeys.title"), self.tr("hotkeys.subtitle")))
         table = QTableWidget(len(self.settings.hotkeys), 2)
-        table.setHorizontalHeaderLabels(["Action", "Hotkey"])
+        table.setHorizontalHeaderLabels([self.tr("hotkeys.action"), self.tr("hotkeys.hotkey")])
         table.horizontalHeader().setStretchLastSection(True)
         for row, (action, hotkey) in enumerate(self.settings.hotkeys.items()):
             table.setItem(row, 0, QTableWidgetItem(action))
@@ -213,16 +239,25 @@ class MainWindow(QMainWindow):
     def _settings_page(self) -> QWidget:
         page = QWidget()
         layout = QVBoxLayout(page)
-        layout.addWidget(make_header("Settings", "Configure OCR and automation timing."))
+        layout.addWidget(make_header(self.tr("settings.title"), self.tr("settings.subtitle")))
+
+        language = QComboBox()
+        language.setObjectName("LanguageSelector")
+        for locale in supported_locales():
+            language.addItem(locale.label, locale.code)
+        language.setCurrentIndex(max(0, language.findData(self.settings.locale)))
+        language.currentIndexChanged.connect(lambda _index: self._update_locale(language.currentData()))
+        layout.addWidget(QLabel(self.tr("settings.language")))
+        layout.addWidget(language)
 
         tesseract = QLineEdit(self.settings.tesseract_cmd)
         tesseract.textChanged.connect(self._update_tesseract)
-        layout.addWidget(QLabel("Tesseract executable path"))
+        layout.addWidget(QLabel(self.tr("settings.tesseractPath")))
         layout.addWidget(tesseract)
 
         profile = QLineEdit(self.settings.active_profile)
         profile.textChanged.connect(self._update_active_profile)
-        layout.addWidget(QLabel("Active profile name"))
+        layout.addWidget(QLabel(self.tr("settings.activeProfile")))
         layout.addWidget(profile)
         layout.addStretch(1)
         return page
@@ -230,7 +265,7 @@ class MainWindow(QMainWindow):
     def _logs_page(self) -> QWidget:
         page = QWidget()
         layout = QVBoxLayout(page)
-        layout.addWidget(make_header("Logs", "Module activity, skipped actions, and errors."))
+        layout.addWidget(make_header(self.tr("logs.title"), self.tr("logs.subtitle")))
         layout.addWidget(self.log_panel)
         return page
 
@@ -254,8 +289,34 @@ class MainWindow(QMainWindow):
     def _update_active_profile(self, value: str) -> None:
         self.settings.active_profile = value.strip() or "default"
         self.settings_service.save(self.settings)
-        self.status_profile.setText(f"Profile: {self.settings.active_profile}")
+        self.status_profile.setText(self.tr("status.profile", profile=self.settings.active_profile))
         self.unit_placer_panel.load_profile(self.settings.active_profile)
+
+    def _update_locale(self, value) -> None:
+        locale = str(value or "en")
+        if locale == self.settings.locale:
+            return
+        previous_index = self.stack.currentIndex()
+        self.unit_placer_panel.shutdown_scanner()
+        self.control_overlay.close()
+        old_central = self.centralWidget()
+        self.settings.locale = locale
+        self.translator.set_locale(self.settings.locale)
+        self.settings_service.save(self.settings)
+        self.setWindowTitle(self.tr("app.title"))
+        self._create_module_panels()
+        self._create_status_labels()
+        self._build_layout()
+        self.stack.setCurrentIndex(max(0, min(previous_index, self.stack.count() - 1)))
+        self.control_overlay = FloatingActionOverlay(
+            self._overlay_actions(),
+            self._overlay_anchor_rect,
+        )
+        self.control_overlay.start()
+        self._register_hotkeys()
+        if old_central is not None:
+            old_central.setParent(None)
+            old_central.deleteLater()
 
     def _register_hotkeys(self) -> None:
         issues = self.hotkey_manager.register(
@@ -271,10 +332,11 @@ class MainWindow(QMainWindow):
 
     def set_selected_window(self, window: WindowInfo) -> None:
         self.selected_window = window
-        self.status_window.setText(f"Window: {window.title}")
+        self.status_window.setText(self.tr("status.windowSelected", title=window.title))
 
     def set_automation_state(self, state: str) -> None:
-        self.status_state.setText(f"Automation: {state}")
+        self.automation_state = state
+        self.status_state.setText(self.tr("status.automation", state=state))
 
     def stop_all(self) -> None:
         self.emergency_stop.request()
@@ -287,7 +349,7 @@ class MainWindow(QMainWindow):
         self.unit_placer_panel.append_log(message)
 
     def _ocr_status_text(self) -> str:
-        return "Tesseract: custom path" if self.settings.tesseract_cmd else "Tesseract: PATH"
+        return self.tr("status.tesseractCustom") if self.settings.tesseract_cmd else self.tr("status.tesseractPath")
 
     def closeEvent(self, event) -> None:
         self.control_overlay.close()
@@ -297,14 +359,40 @@ class MainWindow(QMainWindow):
 
     def _overlay_actions(self) -> list[OverlayAction]:
         return [
-            ("Open App", self._show_main_window, "Show the main OldenEra QOL window.", ""),
-            ("Capture", self.unit_placer_panel.capture_screen, "Capture the current screen.", ""),
-            ("Unit Area", self.unit_placer_panel.set_panel_area, "Select the unit-card panel area.", ""),
-            ("Grid Cells", self.unit_placer_panel.select_grid_cells, "Select battlefield cells.", ""),
-            ("Test Scan", self.unit_placer_panel.test_scan, "Scan the configured unit panel.", ""),
-            ("Move Units", self.unit_placer_panel.move_units, "Run the selected placement template.", "PrimaryButton"),
-            ("Stop", self.stop_all, "Stop any running automation.", "DangerButton"),
+            (
+                self.tr("overlay.openApp"),
+                self._show_main_window,
+                self.tr("overlay.openAppTooltip"),
+                "",
+            ),
+            (
+                self.tr("overlay.selectGrid"),
+                self.unit_placer_panel.select_grid_cells,
+                self.tr("overlay.selectGridTooltip"),
+                "",
+            ),
+            (
+                self.tr("overlay.selectUnitArea"),
+                self.unit_placer_panel.set_panel_area,
+                self.tr("overlay.selectUnitAreaTooltip"),
+                "",
+            ),
+            (
+                self.tr("overlay.savePanel"),
+                self.unit_placer_panel.save_unit_panel,
+                self.tr("overlay.savePanelTooltip"),
+                "",
+            ),
+            (
+                self.tr("overlay.moveUnit"),
+                self.unit_placer_panel.move_units,
+                self.tr("overlay.moveUnitTooltip"),
+                "SuccessButton",
+            ),
         ]
+
+    def tr(self, key: str, **values: object) -> str:
+        return self.translator.t(key, **values)
 
     def _show_main_window(self) -> None:
         self.showNormal()

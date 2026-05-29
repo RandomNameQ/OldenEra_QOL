@@ -1,0 +1,23 @@
+{
+  "nav": {
+    "dashboard": "Panel",
+    "unitPlacer": "Ustawianie",
+    "placementGrid": "Siatka",
+    "units": "Jednostki",
+    "hotkeys": "Skróty",
+    "settings": "Ustawienia",
+    "logs": "Dzienniki"
+  },
+  "settings": {
+    "title": "Ustawienia",
+    "language": "Język"
+  },
+  "units": {
+    "title": "Jednostki",
+    "faction": "Frakcja"
+  },
+  "placementGrid": {
+    "title": "Siatka ustawienia",
+    "units": "Jednostki"
+  }
+}

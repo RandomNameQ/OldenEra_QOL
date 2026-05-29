@@ -1,0 +1,23 @@
+{
+  "nav": {
+    "dashboard": "대시보드",
+    "unitPlacer": "유닛 배치",
+    "placementGrid": "배치 격자",
+    "units": "유닛",
+    "hotkeys": "단축키",
+    "settings": "설정",
+    "logs": "로그"
+  },
+  "settings": {
+    "title": "설정",
+    "language": "언어"
+  },
+  "units": {
+    "title": "유닛",
+    "faction": "진영"
+  },
+  "placementGrid": {
+    "title": "배치 격자",
+    "units": "유닛"
+  }
+}

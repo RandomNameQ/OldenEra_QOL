@@ -30,11 +30,12 @@ from PySide6.QtWidgets import (
 )
 
 from oldenera_qol.app.widgets import make_header
+from oldenera_qol.localization import DEFAULT_LOCALE, Translator
 from oldenera_qol.modules.placement_grid.geometry import build_deployment_grid, cell_at_point, nearest_cell
 from oldenera_qol.modules.placement_grid.layout import move_or_swap_unit, update_unit_at
 from oldenera_qol.modules.placement_grid.models import GridCell, PlacedUnit, PlacementTemplate
 from oldenera_qol.modules.placement_grid.repository import PlacementTemplateRepository
-from oldenera_qol.units.models import UnitRecord
+from oldenera_qol.units.models import PSEUDO_ANY_UNIT_NAME, UnitRecord
 from oldenera_qol.units.repository import UnitRepository
 
 
@@ -272,12 +273,14 @@ class TemplateIconDialog(QDialog):
         app_root: Path,
         icon_for_path: Callable[[Path], QIcon],
         parent: QWidget | None = None,
+        locale: str = DEFAULT_LOCALE,
     ) -> None:
         super().__init__(parent)
         self.setWindowTitle("Choose template icon")
         self.units = units
         self.app_root = app_root
         self.icon_for_path = icon_for_path
+        self.locale = locale
         self.selected_icon_path = ""
         self._pending_icon_rows: list[int] = []
         self.search = QLineEdit()
@@ -313,14 +316,20 @@ class TemplateIconDialog(QDialog):
         self.unit_list.clear()
         self._pending_icon_rows = []
         row_to_select = 0
-        for name, record in self.units.items():
-            if search_text and search_text not in name.lower():
+        for name, record in sorted(
+            self.units.items(),
+            key=lambda item: item[1].display_name(self.locale).lower(),
+        ):
+            display_name = record.display_name(self.locale)
+            if search_text and search_text not in name.lower() and search_text not in display_name.lower():
                 continue
-            item = QListWidgetItem(name)
+            item = QListWidgetItem(display_name)
             item.setData(Qt.ItemDataRole.UserRole, record.icon)
+            if display_name != name:
+                item.setToolTip(name)
             self.unit_list.addItem(item)
             self._pending_icon_rows.append(self.unit_list.count() - 1)
-            if name == selected_name:
+            if display_name == selected_name or name == selected_name:
                 row_to_select = self.unit_list.count() - 1
         if self.unit_list.count() > 0:
             self.unit_list.setCurrentRow(row_to_select)
@@ -354,6 +363,8 @@ class PlacementGridPanel(QWidget):
         template_repository: PlacementTemplateRepository,
         log,
         on_templates_changed: Callable[[], None] | None = None,
+        translator: Translator | None = None,
+        locale: str = DEFAULT_LOCALE,
     ) -> None:
         super().__init__()
         self.app_root = app_root
@@ -361,6 +372,8 @@ class PlacementGridPanel(QWidget):
         self.template_repository = template_repository
         self.log = log
         self.on_templates_changed = on_templates_changed
+        self.translator = translator
+        self.locale = locale
         self.units: dict[str, UnitRecord] = {}
         self.cells = build_deployment_grid(radius=36)
         self.placed_units: list[PlacedUnit] = []
@@ -386,14 +399,14 @@ class PlacementGridPanel(QWidget):
         self.unit_list = QListWidget()
         self.unit_list.setUniformItemSizes(True)
         self.unit_search = QLineEdit()
-        self.unit_search.setPlaceholderText("Search units by name")
+        self.unit_search.setPlaceholderText(self.tr("placementGrid.searchUnits"))
         self.unit_preview = QLabel()
         self.unit_preview.setMinimumSize(120, 90)
         self.unit_preview.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.quantity_mode = QComboBox()
         self.quantity_mode.addItem("Max", "max")
         self.quantity_mode.addItem("Any", "any")
-        self.selected_label = QLabel("Selected: none")
+        self.selected_label = QLabel(self.tr("placementGrid.selectedNone"))
 
         self._build_layout()
         self.reload_units()
@@ -403,20 +416,20 @@ class PlacementGridPanel(QWidget):
         layout = QVBoxLayout(self)
         layout.addWidget(
             make_header(
-                "Placement Grid",
-                "Select a unit, click a hex to place it, then drag icons to move or swap them.",
+                self.tr("placementGrid.title"),
+                self.tr("placementGrid.subtitle"),
             )
         )
 
         toolbar = QHBoxLayout()
-        toolbar.addWidget(QLabel("Quantity rule"))
+        toolbar.addWidget(QLabel(self.tr("placementGrid.quantityRule")))
         toolbar.addWidget(self.quantity_mode)
 
-        update_button = QPushButton("Update Selected")
+        update_button = QPushButton(self.tr("placementGrid.updateSelected"))
         update_button.clicked.connect(self.update_selected_unit)
-        refresh_button = QPushButton("Refresh Units")
+        refresh_button = QPushButton(self.tr("placementGrid.refreshUnits"))
         refresh_button.clicked.connect(self.reload_units)
-        clear_button = QPushButton("Clear Grid")
+        clear_button = QPushButton(self.tr("placementGrid.clearGrid"))
         clear_button.clicked.connect(self.clear_grid)
         toolbar.addWidget(update_button)
         toolbar.addWidget(clear_button)
@@ -426,7 +439,7 @@ class PlacementGridPanel(QWidget):
 
         body = QHBoxLayout()
         left_panel = QVBoxLayout()
-        left_panel.addWidget(QLabel("Placement templates"))
+        left_panel.addWidget(QLabel(self.tr("placementGrid.placementTemplates")))
         self.template_list.setMinimumHeight(184)
         self.template_list.setMaximumHeight(184)
         left_panel.addWidget(self.template_list)
@@ -437,15 +450,15 @@ class PlacementGridPanel(QWidget):
             ("Rename", self.rename_current_template),
             ("Delete", self.delete_current_template),
         ]:
-            button = QPushButton(text)
+            button = QPushButton(self._template_button_label(text))
             button.clicked.connect(handler)
             template_buttons.addWidget(button)
         left_panel.addLayout(template_buttons)
-        image_button = QPushButton("Choose Icon")
+        image_button = QPushButton(self.tr("placementGrid.chooseIcon"))
         image_button.clicked.connect(self.choose_template_icon)
         left_panel.addWidget(image_button)
         left_panel.addWidget(self.template_preview)
-        left_panel.addWidget(QLabel("Units"))
+        left_panel.addWidget(QLabel(self.tr("placementGrid.units")))
         self.unit_list.setMinimumWidth(240)
         self.unit_list.setMinimumHeight(280)
         left_panel.addWidget(refresh_button)
@@ -470,10 +483,20 @@ class PlacementGridPanel(QWidget):
     def _refresh_unit_list(self) -> None:
         search_text = self.unit_search.text().strip().lower()
         self.unit_list.clear()
-        for name, record in self.units.items():
-            if search_text and search_text not in name.lower():
+        for name, record in sorted(
+            self.units.items(),
+            key=lambda item: (
+                item[0].strip().upper() != PSEUDO_ANY_UNIT_NAME,
+                item[0].lower(),
+            ),
+        ):
+            display_name = record.display_name(self.locale)
+            if search_text and search_text not in name.lower() and search_text not in display_name.lower():
                 continue
-            item = QListWidgetItem(name)
+            item = QListWidgetItem(display_name)
+            item.setData(Qt.ItemDataRole.UserRole, name)
+            if display_name != name:
+                item.setToolTip(name)
             icon_path = self._absolute_path(record.icon)
             if icon_path.exists():
                 item.setIcon(self._icon_for_path(icon_path))
@@ -594,6 +617,7 @@ class PlacementGridPanel(QWidget):
             self.app_root,
             self._icon_for_path,
             self,
+            locale=self.locale,
         )
         if dialog.exec() != QDialog.DialogCode.Accepted or not dialog.selected_icon_path:
             return
@@ -623,11 +647,12 @@ class PlacementGridPanel(QWidget):
         current = self.unit_list.currentItem()
         if current is None:
             return False
+        unit_name = self._item_unit_name(current)
         cell = cell_at_point(self.cells, x, y, 36)
         if cell is None:
             return False
         unit = PlacedUnit(
-            current.text(),
+            unit_name,
             cell.row,
             cell.col,
             self._current_quantity_value(),
@@ -663,7 +688,7 @@ class PlacementGridPanel(QWidget):
         ]
         if self.selected_cell == (row, col):
             self.selected_cell = None
-            self.selected_label.setText("Selected: none")
+            self.selected_label.setText(self.tr("placementGrid.selectedNone"))
         self.highlighted_cells.discard((row, col))
         self._save_and_redraw()
         self._sync_selected_controls()
@@ -726,7 +751,7 @@ class PlacementGridPanel(QWidget):
         self.placed_units = []
         self.selected_cell = None
         self.highlighted_cells = set()
-        self.selected_label.setText("Selected: none")
+        self.selected_label.setText(self.tr("placementGrid.selectedNone"))
         self._save_and_redraw()
 
     def _template_selection_changed(self, current: QListWidgetItem | None) -> None:
@@ -740,7 +765,7 @@ class PlacementGridPanel(QWidget):
             self.unit_preview.clear()
             self.clear_placement_preview()
             return
-        record = self.units.get(current.text())
+        record = self.units.get(self._item_unit_name(current))
         if record is None:
             self.unit_preview.clear()
             self.clear_placement_preview()
@@ -770,12 +795,12 @@ class PlacementGridPanel(QWidget):
                 QPen(self._hex_pen_color(is_highlighted, is_selected), 4 if is_highlighted or is_selected else 2),
                 QBrush(self._hex_brush_color(cell)),
             )
-            item.setToolTip(f"Cell {index}")
+            item.setToolTip(self.tr("placementGrid.cell", index=index))
             item.setZValue(0)
             self.hex_items[(cell.row, cell.col)] = item
             label = self.scene.addText(str(index))
             label.setDefaultTextColor(QColor("#eef3f6"))
-            label.setToolTip(f"Cell {index}")
+            label.setToolTip(self.tr("placementGrid.cell", index=index))
             label.setPos(cell.center_x - label.boundingRect().width() / 2, cell.center_y - 35)
             label.setZValue(2)
             label.setAcceptedMouseButtons(Qt.MouseButton.NoButton)
@@ -802,13 +827,14 @@ class PlacementGridPanel(QWidget):
         if current is None:
             self.clear_placement_preview()
             return
-        record = self.units.get(current.text())
+        unit_name = self._item_unit_name(current)
+        record = self.units.get(unit_name)
         if record is None:
             self.clear_placement_preview()
             return
         if (
             self.placement_preview_item is None
-            or self.placement_preview_unit_name != current.text()
+            or self.placement_preview_unit_name != unit_name
         ):
             if self.placement_preview_item is not None:
                 self.scene.removeItem(self.placement_preview_item)
@@ -819,7 +845,7 @@ class PlacementGridPanel(QWidget):
             self.placement_preview_item.setZValue(4)
             self.placement_preview_item.setAcceptedMouseButtons(Qt.MouseButton.NoButton)
             self.scene.addItem(self.placement_preview_item)
-            self.placement_preview_unit_name = current.text()
+            self.placement_preview_unit_name = unit_name
         self.placement_preview_item.setPos(cell.center_x, cell.center_y)
 
     def _unit_moved(self, placed: PlacedUnit, cell: GridCell) -> None:
@@ -846,21 +872,31 @@ class PlacementGridPanel(QWidget):
         self.selected_cell = (placed.row, placed.col)
         self._set_quantity_mode(placed.normalized_mode())
         self.selected_label.setText(
-            f"Selected: {placed.unit_name} at row {placed.row + 1}, col {placed.col + 1}"
+            self.tr(
+                "placementGrid.selectedUnit",
+                unit=self._display_unit_name(placed.unit_name),
+                row=placed.row + 1,
+                col=placed.col + 1,
+            )
         )
 
     def _sync_selected_controls(self) -> None:
         if self.selected_cell is None:
-            self.selected_label.setText("Selected: none")
+            self.selected_label.setText(self.tr("placementGrid.selectedNone"))
             return
         unit = self._unit_at(*self.selected_cell)
         if unit is None:
             self.selected_cell = None
-            self.selected_label.setText("Selected: none")
+            self.selected_label.setText(self.tr("placementGrid.selectedNone"))
             return
         self._set_quantity_mode(unit.normalized_mode())
         self.selected_label.setText(
-            f"Selected: {unit.unit_name} at row {unit.row + 1}, col {unit.col + 1}"
+            self.tr(
+                "placementGrid.selectedUnit",
+                unit=self._display_unit_name(unit.unit_name),
+                row=unit.row + 1,
+                col=unit.col + 1,
+            )
         )
 
     def _clear_swap_highlight(self) -> None:
@@ -942,6 +978,46 @@ class PlacementGridPanel(QWidget):
     def _set_quantity_mode(self, mode: str) -> None:
         index = self.quantity_mode.findData(mode)
         self.quantity_mode.setCurrentIndex(index if index >= 0 else 0)
+
+    def _item_unit_name(self, item: QListWidgetItem) -> str:
+        return str(item.data(Qt.ItemDataRole.UserRole) or item.text())
+
+    def _display_unit_name(self, unit_name: str) -> str:
+        record = self.units.get(unit_name)
+        return record.display_name(self.locale) if record is not None else unit_name
+
+    def _template_button_label(self, text: str) -> str:
+        keys = {
+            "New": "placementGrid.new",
+            "Save": "placementGrid.save",
+            "Rename": "placementGrid.rename",
+            "Delete": "placementGrid.delete",
+        }
+        return self.tr(keys[text])
+
+    def tr(self, key: str, **values: object) -> str:
+        if self.translator is not None:
+            return self.translator.t(key, **values)
+        fallback = {
+            "placementGrid.title": "Placement Grid",
+            "placementGrid.subtitle": "Select a unit, click a hex to place it, then drag icons to move or swap them.",
+            "placementGrid.quantityRule": "Quantity rule",
+            "placementGrid.updateSelected": "Update Selected",
+            "placementGrid.refreshUnits": "Refresh Units",
+            "placementGrid.clearGrid": "Clear Grid",
+            "placementGrid.selectedNone": "Selected: none",
+            "placementGrid.selectedUnit": "Selected: {unit} at row {row}, col {col}",
+            "placementGrid.placementTemplates": "Placement templates",
+            "placementGrid.new": "New",
+            "placementGrid.save": "Save",
+            "placementGrid.rename": "Rename",
+            "placementGrid.delete": "Delete",
+            "placementGrid.chooseIcon": "Choose Icon",
+            "placementGrid.units": "Units",
+            "placementGrid.searchUnits": "Search units by name",
+            "placementGrid.cell": "Cell {index}",
+        }.get(key, key)
+        return fallback.format(**values) if values else fallback
 
     def _update_template_preview(self) -> None:
         image_path = self._absolute_path(self.current_template_image)

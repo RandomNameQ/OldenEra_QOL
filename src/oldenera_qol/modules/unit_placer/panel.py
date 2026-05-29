@@ -32,6 +32,7 @@ from oldenera_qol.app.widgets import LogPanel, ScreenshotCanvas, SelectionOverla
 from oldenera_qol.automation.mouse import AutomationTiming, DragExecutor, EmergencyStop
 from oldenera_qol.automation.window import WindowController
 from oldenera_qol.config.settings import AppSettings, SettingsService
+from oldenera_qol.localization import Translator
 from oldenera_qol.modules.base import ValidationIssue
 from oldenera_qol.modules.placement_grid.geometry import build_deployment_grid
 from oldenera_qol.modules.placement_grid.models import PlacementTemplate
@@ -45,10 +46,14 @@ from oldenera_qol.modules.unit_placer.service import CalibratedUnitPlacerService
 from oldenera_qol.modules.unit_placer.saved_panels import SavedUnitPanel, SavedUnitPanelRepository
 from oldenera_qol.profiles.models import UnitProfile, validate_profile
 from oldenera_qol.profiles.repository import ProfileRepository
+from oldenera_qol.units.models import is_pseudo_any_unit_name
 from oldenera_qol.units.repository import UnitRepository
 from oldenera_qol.vision.capture import ScreenCapture, WindowBounds
 from oldenera_qol.vision.ocr import QuantityOcr
 from oldenera_qol.vision.models import Rect
+
+SAVED_UNIT_PANEL_SELECTOR_ICON_SIZE = QSize(320, 92)
+SAVED_UNIT_PANEL_SELECTOR_MINIMUM_SIZE = QSize(380, 112)
 
 
 class _ScanSignals(QObject):
@@ -142,6 +147,11 @@ class NumberedGridView(QGraphicsView):
         ]
 
 
+class _WheelLockedComboBox(QComboBox):
+    def wheelEvent(self, event) -> None:
+        event.ignore()
+
+
 class UnitPlacerPanel(QWidget):
     id = "unit_placer"
     name = "Unit Placer"
@@ -159,6 +169,7 @@ class UnitPlacerPanel(QWidget):
         placement_template_repository: PlacementTemplateRepository | None = None,
         unit_repository: UnitRepository | None = None,
         app_root: Path | None = None,
+        translator: Translator | None = None,
     ) -> None:
         super().__init__()
         self.settings = settings
@@ -170,12 +181,13 @@ class UnitPlacerPanel(QWidget):
         self.placement_template_repository = placement_template_repository
         self.unit_repository = unit_repository or UnitRepository(Path.cwd() / "data" / "units.json")
         self.app_root = app_root or Path.cwd()
+        self.translator = translator
         self.on_window_selected = on_window_selected
         self.set_automation_state = set_automation_state
         self.capture = ScreenCapture()
         self.current_screenshot = None
         self._calibrated_service_instance: CalibratedUnitPlacerService | None = None
-        self._calibrated_service_key: tuple[str, int] | None = None
+        self._calibrated_service_key: tuple[object, ...] | None = None
         self._placement_template_cache: dict[str, tuple[int, int, str]] = {}
         self._scan_executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="unit-panel-scan")
         self._scan_future: Future | None = None
@@ -184,6 +196,7 @@ class UnitPlacerPanel(QWidget):
         self._scan_signals.finished.connect(self._position_update_finished)
         self._scan_signals.failed.connect(self._position_update_failed)
         self._run_future: Future | None = None
+        self._move_units_start_pending = False
         self._run_signals = _RunSignals(self)
         self._run_signals.finished.connect(self._run_finished)
         self._run_signals.failed.connect(self._run_failed)
@@ -218,10 +231,13 @@ class UnitPlacerPanel(QWidget):
         self.placement_template_list.setUniformItemSizes(True)
         self.placement_template_summary = QLabel("No placement template selected")
         self.realtime_panel_checkbox = QCheckBox("Realtime unit panel")
-        self.realtime_panel_checkbox.setChecked(True)
+        self.realtime_panel_checkbox.setChecked(False)
         self.realtime_panel_checkbox.toggled.connect(self._unit_panel_source_mode_changed)
         self.saved_unit_panel_selector_label = QLabel("Saved panel")
-        self.saved_unit_panel_selector = QComboBox()
+        self.saved_unit_panel_selector = _WheelLockedComboBox()
+        self.saved_unit_panel_selector.setIconSize(SAVED_UNIT_PANEL_SELECTOR_ICON_SIZE)
+        self.saved_unit_panel_selector.setMinimumSize(SAVED_UNIT_PANEL_SELECTOR_MINIMUM_SIZE)
+        self.saved_unit_panel_selector.view().setIconSize(SAVED_UNIT_PANEL_SELECTOR_ICON_SIZE)
         self.saved_unit_panel_selector.currentIndexChanged.connect(
             self._saved_unit_panel_selector_changed
         )
@@ -248,15 +264,15 @@ class UnitPlacerPanel(QWidget):
         layout = QVBoxLayout(self)
         layout.addWidget(
             make_header(
-                "Unit Placer",
-                "Calibrate the panel and grid, scan unit order, then move units into place.",
+                self.tr("unitPlacer.title"),
+                self.tr("unitPlacer.subtitle"),
             )
         )
 
         tabs = QTabWidget()
-        tabs.addTab(self._setup_tab(), "Placement Setup")
-        tabs.addTab(self._cell_map_tab(), "Cell Map")
-        tabs.addTab(self._unit_panel_tab(), "Unit Panel")
+        tabs.addTab(self._setup_tab(), self.tr("unitPlacer.placementSetup"))
+        tabs.addTab(self._cell_map_tab(), self.tr("unitPlacer.cellMap"))
+        tabs.addTab(self._unit_panel_tab(), self.tr("unitPlacer.unitPanel"))
         layout.addWidget(tabs, 1)
 
     def _setup_tab(self) -> QWidget:
@@ -270,7 +286,7 @@ class UnitPlacerPanel(QWidget):
         splitter = QSplitter()
         left = QWidget()
         left_layout = QVBoxLayout(left)
-        left_layout.addWidget(QLabel("Preview"))
+        left_layout.addWidget(QLabel(self.tr("unitPlacer.preview")))
         self.canvas.setMinimumWidth(156)
         left_layout.addWidget(self.canvas)
         self.canvas.clicked.connect(self._canvas_clicked)
@@ -294,7 +310,7 @@ class UnitPlacerPanel(QWidget):
         splitter.setSizes([234, 1066])
         layout.addWidget(splitter, 1)
 
-        layout.addWidget(QLabel("Module log"))
+        layout.addWidget(QLabel(self.tr("unitPlacer.moduleLog")))
         layout.addWidget(self.module_log)
         return tab
 
@@ -303,12 +319,12 @@ class UnitPlacerPanel(QWidget):
         layout = QVBoxLayout(tab)
         layout.addWidget(
             make_header(
-                "Cell Map",
-                "Use these numbers as the reference when selecting battlefield cells in the game.",
+                self.tr("unitPlacer.cellMap"),
+                self.tr("unitPlacer.cellMapSubtitle"),
             )
         )
         description = QLabel(
-            "The app assigns these numbers to the hex grid. Click cells on the game screen in this order so the saved coordinates match the Placement Grid template."
+            self.tr("unitPlacer.cellMapDescription")
         )
         description.setWordWrap(True)
         layout.addWidget(description)
@@ -320,38 +336,38 @@ class UnitPlacerPanel(QWidget):
         layout = QVBoxLayout(tab)
         layout.addWidget(
             make_header(
-                "Unit Panel",
-                "Saved unit panels can be reused when realtime panel capture is unavailable.",
+                self.tr("unitPlacer.unitPanel"),
+                self.tr("unitPlacer.unitPanelSubtitle"),
             )
         )
 
         splitter = QSplitter()
         left = QWidget()
         left_layout = QVBoxLayout(left)
-        left_layout.addWidget(QLabel("Saved panels"))
+        left_layout.addWidget(QLabel(self.tr("unitPlacer.savedPanels")))
         self.saved_unit_panel_list.setMinimumWidth(280)
         self.saved_unit_panel_list.currentItemChanged.connect(self._saved_unit_panel_list_selected)
         left_layout.addWidget(self.saved_unit_panel_list, 1)
         buttons = QHBoxLayout()
         buttons.addWidget(
             self._action_button(
-                "Refresh",
+                self.tr("unitPlacer.refresh"),
                 self.refresh_unit_panels,
-                "Reload saved unit panels from disk.",
+                self.tr("unitPlacer.refreshSavedPanelsTooltip"),
             )
         )
         buttons.addWidget(
             self._action_button(
-                "Select",
+                self.tr("unitPlacer.select"),
                 self.select_listed_unit_panel,
-                "Use the highlighted saved panel for saved-panel mode.",
+                self.tr("unitPlacer.selectSavedPanelTooltip"),
             )
         )
         buttons.addWidget(
             self._action_button(
-                "Delete",
+                self.tr("unitPlacer.delete"),
                 self.delete_selected_unit_panel,
-                "Delete the highlighted saved panel and its image.",
+                self.tr("unitPlacer.deleteSavedPanelTooltip"),
                 danger=True,
             )
         )
@@ -359,7 +375,7 @@ class UnitPlacerPanel(QWidget):
 
         right = QWidget()
         right_layout = QVBoxLayout(right)
-        right_layout.addWidget(QLabel("Preview"))
+        right_layout.addWidget(QLabel(self.tr("unitPlacer.preview")))
         self.saved_unit_panel_preview.setMinimumHeight(220)
         right_layout.addWidget(self.saved_unit_panel_preview, 1)
         right_layout.addWidget(self.saved_unit_panel_summary)
@@ -557,17 +573,31 @@ class UnitPlacerPanel(QWidget):
         self.saved_unit_panel_list.clear()
         for name in names:
             label = name
+            panel = None
             try:
                 panel = self.unit_panel_repository.load(name)
                 if panel.created_at:
                     label = f"{name} | {panel.created_at}"
             except (OSError, json.JSONDecodeError):
-                panel = None
+                pass
             item = QListWidgetItem(label)
             item.setData(Qt.ItemDataRole.UserRole, name)
             item.setSizeHint(QSize(0, 48))
             self.saved_unit_panel_list.addItem(item)
-            self.saved_unit_panel_selector.addItem(name, name)
+            selector_icon = self._saved_unit_panel_selector_icon(panel)
+            selector_text = "" if not selector_icon.isNull() else name
+            self.saved_unit_panel_selector.addItem(selector_icon, selector_text, name)
+            selector_row = self.saved_unit_panel_selector.count() - 1
+            self.saved_unit_panel_selector.setItemData(
+                selector_row,
+                SAVED_UNIT_PANEL_SELECTOR_MINIMUM_SIZE,
+                Qt.ItemDataRole.SizeHintRole,
+            )
+            self.saved_unit_panel_selector.setItemData(
+                selector_row,
+                name,
+                Qt.ItemDataRole.ToolTipRole,
+            )
 
         row_to_select = -1
         if selected_name:
@@ -676,6 +706,14 @@ class UnitPlacerPanel(QWidget):
             f"Selected: {panel.name} | created: {panel.created_at or 'unknown'}"
         )
 
+    def _saved_unit_panel_selector_icon(self, panel: SavedUnitPanel | None) -> QIcon:
+        if panel is None:
+            return QIcon()
+        image_path = self.unit_panel_repository.image_path(panel)
+        if not image_path.exists():
+            return QIcon()
+        return QIcon(str(image_path))
+
     def _unit_panel_source_mode_changed(self, realtime: bool) -> None:
         self.saved_unit_panel_selector_label.setVisible(not realtime)
         self.saved_unit_panel_selector.setVisible(not realtime)
@@ -777,7 +815,7 @@ class UnitPlacerPanel(QWidget):
         self.append_log("Grid-cell selection overlay opened")
 
     def _confirm_reset(self, title: str) -> bool:
-        return (
+        confirmed = (
             QMessageBox.question(
                 self,
                 title,
@@ -787,6 +825,8 @@ class UnitPlacerPanel(QWidget):
             )
             == QMessageBox.StandardButton.Yes
         )
+        self._return_focus_to_game_window()
+        return confirmed
 
     def test_scan(self) -> None:
         if not self.realtime_panel_checkbox.isChecked():
@@ -857,8 +897,38 @@ class UnitPlacerPanel(QWidget):
         self.selection_overlay = overlay
         overlay.show()
         overlay.raise_()
-        overlay.activateWindow()
-        overlay.setFocus()
+        self._return_focus_to_game_window()
+
+    def _return_focus_to_game_window(self) -> None:
+        focused = self._focus_game_window()
+        if not focused:
+            return
+        QTimer.singleShot(0, self._focus_game_window)
+        QTimer.singleShot(80, self._focus_game_window)
+
+    def _focus_game_window(self) -> bool:
+        for hint in self._game_window_title_hints():
+            window = self.window_controller.find_by_title_hint(hint)
+            if window is not None and self.window_controller.focus(window.handle):
+                self.on_window_selected(window)
+                return True
+        return False
+
+    def _game_window_title_hints(self) -> list[str]:
+        hints = [
+            self.profile.window_title_hint.strip(),
+            "HeroesOldenEra",
+            "OldenEra",
+        ]
+        seen: set[str] = set()
+        unique_hints: list[str] = []
+        for hint in hints:
+            key = hint.lower()
+            if not hint or key in seen:
+                continue
+            seen.add(key)
+            unique_hints.append(hint)
+        return unique_hints
 
     def _overlay_panel_area_selected(self, x: int, y: int, width: int, height: int) -> None:
         self._save_panel_rect(Rect(x, y, width, height))
@@ -963,7 +1033,9 @@ class UnitPlacerPanel(QWidget):
         self.move_units()
 
     def move_units(self) -> None:
-        if self._run_future is not None and not self._run_future.done():
+        if self._move_units_start_pending or (
+            self._run_future is not None and not self._run_future.done()
+        ):
             self.append_log("Move Units already in progress")
             return
         self.emergency_stop.reset()
@@ -985,14 +1057,37 @@ class UnitPlacerPanel(QWidget):
         if template is None:
             self.append_log("Move Units skipped: no placement template selected")
             return
-        bounds = self._screen_bounds()
         service = self._calibrated_service()
         timing = AutomationTiming(
             move_duration_seconds=self.settings.automation.move_duration_seconds,
             pause_between_moves_seconds=self.settings.automation.pause_between_moves_seconds,
             drag_button=self.settings.automation.drag_button,
         )
+        if not self._focus_game_window():
+            self.append_log("Move Units skipped: game window not found")
+            return
+        self._move_units_start_pending = True
+        self.append_log("Focused game window; Move Units starting")
+        QTimer.singleShot(
+            120,
+            lambda: self._start_move_units(saved_panel, template, service, timing),
+        )
+
+    def _start_move_units(
+        self,
+        saved_panel: SavedUnitPanel | None,
+        template: PlacementTemplate,
+        service: CalibratedUnitPlacerService,
+        timing: AutomationTiming,
+    ) -> None:
+        if not self._move_units_start_pending:
+            return
+        self._move_units_start_pending = False
+        if self._run_future is not None and not self._run_future.done():
+            self.append_log("Move Units already in progress")
+            return
         self.set_automation_state("running")
+        bounds = self._screen_bounds()
         self._run_future = self._scan_executor.submit(
             self._run_automation,
             bounds,
@@ -1008,6 +1103,7 @@ class UnitPlacerPanel(QWidget):
 
     def stop(self) -> None:
         self.emergency_stop.request()
+        self._move_units_start_pending = False
         if self._run_future is not None and not self._run_future.done():
             self.set_automation_state("stopping")
         self.append_log("Unit Placer stop requested")
@@ -1057,39 +1153,59 @@ class UnitPlacerPanel(QWidget):
     def _calibrated_service(self) -> CalibratedUnitPlacerService:
         units = None
         repository_mtime = 0
-        allowed_unit_names = self._selected_template_unit_names()
+        template = self._selected_template()
+        scan_unit_names = self._selected_template_scan_unit_names(template)
+        use_any_for_unmatched = bool(
+            template is not None
+            and any(is_pseudo_any_unit_name(unit.unit_name) for unit in template.units)
+        )
         if self._calibrated_service_instance is None:
             units = self.unit_repository.load()
         try:
             repository_mtime = self.unit_repository.path.stat().st_mtime_ns
         except OSError:
             pass
-        key = (self.settings.tesseract_cmd, repository_mtime, allowed_unit_names)
+        key = (
+            self.settings.tesseract_cmd,
+            repository_mtime,
+            scan_unit_names,
+            use_any_for_unmatched,
+        )
         if self._calibrated_service_instance is None or self._calibrated_service_key != key:
             if units is None:
                 units = self.unit_repository.load()
-            if allowed_unit_names:
-                filtered_units = {
+            if scan_unit_names is not None:
+                units = {
                     name: record
                     for name, record in units.items()
-                    if name in allowed_unit_names
+                    if name in scan_unit_names
                 }
-                if filtered_units:
-                    units = filtered_units
             self._calibrated_service_instance = CalibratedUnitPlacerService(
                 units=units,
                 app_root=self.app_root,
                 ocr=QuantityOcr(self.settings.tesseract_cmd),
                 log=self.append_log,
+                use_any_for_unmatched=use_any_for_unmatched,
             )
             self._calibrated_service_key = key
         return self._calibrated_service_instance
 
     def _selected_template_unit_names(self) -> tuple[str, ...]:
-        template = self._selected_template()
+        return self._selected_template_scan_unit_names(self._selected_template()) or ()
+
+    @staticmethod
+    def _selected_template_scan_unit_names(template: PlacementTemplate | None) -> tuple[str, ...] | None:
         if template is None:
-            return ()
-        return tuple(sorted({unit.unit_name for unit in template.units if unit.unit_name}))
+            return None
+        return tuple(
+            sorted(
+                {
+                    unit.unit_name
+                    for unit in template.units
+                    if unit.unit_name and not is_pseudo_any_unit_name(unit.unit_name)
+                }
+            )
+        )
 
     def _selected_template(self) -> PlacementTemplate | None:
         if self.selected_placement_template is not None:
@@ -1138,7 +1254,7 @@ class UnitPlacerPanel(QWidget):
         if self.realtime_panel_checkbox.isChecked() and self.calibration.panel_scan_rect is None:
             return "Next: open 1. Unit Area and click Select Unit Area."
         if not self.realtime_panel_checkbox.isChecked() and self._selected_saved_unit_panel() is None:
-            return "Next: turn off realtime only after selecting a saved Unit Panel."
+            return "Next: select a saved Unit Panel or enable Realtime unit panel."
         grid_cell_count = len(self.calibration.grid_cells)
         required_grid_cell_count = len(self.numbered_grid_cells)
         if grid_cell_count < required_grid_cell_count:
@@ -1820,6 +1936,30 @@ class UnitPlacerPanel(QWidget):
     def _absolute_path(self, path: str) -> Path:
         candidate = Path(path)
         return candidate if candidate.is_absolute() else self.app_root / candidate
+
+    def tr(self, key: str, **values: object) -> str:
+        if self.translator is not None:
+            return self.translator.t(key, **values)
+        fallback = {
+            "unitPlacer.title": "Unit Placer",
+            "unitPlacer.subtitle": "Calibrate the panel and grid, scan unit order, then move units into place.",
+            "unitPlacer.placementSetup": "Placement Setup",
+            "unitPlacer.cellMap": "Cell Map",
+            "unitPlacer.unitPanel": "Unit Panel",
+            "unitPlacer.preview": "Preview",
+            "unitPlacer.moduleLog": "Module log",
+            "unitPlacer.cellMapSubtitle": "Use these numbers as the reference when selecting battlefield cells in the game.",
+            "unitPlacer.cellMapDescription": "The app assigns these numbers to the hex grid. Click cells on the game screen in this order so the saved coordinates match the Placement Grid template.",
+            "unitPlacer.unitPanelSubtitle": "Saved unit panels can be reused when realtime panel capture is unavailable.",
+            "unitPlacer.savedPanels": "Saved panels",
+            "unitPlacer.refresh": "Refresh",
+            "unitPlacer.select": "Select",
+            "unitPlacer.delete": "Delete",
+            "unitPlacer.refreshSavedPanelsTooltip": "Reload saved unit panels from disk.",
+            "unitPlacer.selectSavedPanelTooltip": "Use the highlighted saved panel for saved-panel mode.",
+            "unitPlacer.deleteSavedPanelTooltip": "Delete the highlighted saved panel and its image.",
+        }.get(key, key)
+        return fallback.format(**values) if values else fallback
 
 
 def _panel_scan_rect_issue(rect: Rect) -> str | None:

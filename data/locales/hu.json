@@ -1,0 +1,23 @@
+{
+  "nav": {
+    "dashboard": "Áttekintés",
+    "unitPlacer": "Egységelhelyező",
+    "placementGrid": "Elhelyezési rács",
+    "units": "Egységek",
+    "hotkeys": "Gyorsbillentyűk",
+    "settings": "Beállítások",
+    "logs": "Naplók"
+  },
+  "settings": {
+    "title": "Beállítások",
+    "language": "Nyelv"
+  },
+  "units": {
+    "title": "Egységek",
+    "faction": "Frakció"
+  },
+  "placementGrid": {
+    "title": "Elhelyezési rács",
+    "units": "Egységek"
+  }
+}

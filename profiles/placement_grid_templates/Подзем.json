@@ -1,0 +1,55 @@
+{
+  "name": "\u041f\u043e\u0434\u0437\u0435\u043c",
+  "image_path": "assets/units/icons/black_dragon_upg.png",
+  "units": [
+    {
+      "unit_name": "Aureate Dancer",
+      "row": 9,
+      "col": 0,
+      "quantity": 1,
+      "quantity_mode": "max"
+    },
+    {
+      "unit_name": "Medusa",
+      "row": 10,
+      "col": 0,
+      "quantity": 1,
+      "quantity_mode": "max"
+    },
+    {
+      "unit_name": "Infiltrator",
+      "row": 10,
+      "col": 1,
+      "quantity": 1,
+      "quantity_mode": "any"
+    },
+    {
+      "unit_name": "Infiltrator",
+      "row": 8,
+      "col": 1,
+      "quantity": 1,
+      "quantity_mode": "any"
+    },
+    {
+      "unit_name": "Infiltrator",
+      "row": 8,
+      "col": 0,
+      "quantity": 1,
+      "quantity_mode": "max"
+    },
+    {
+      "unit_name": "Black Dragon",
+      "row": 9,
+      "col": 1,
+      "quantity": 1,
+      "quantity_mode": "any"
+    },
+    {
+      "unit_name": "Infernal Troglodyte",
+      "row": 7,
+      "col": 0,
+      "quantity": 1,
+      "quantity_mode": "any"
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "nav": {
+    "dashboard": "Přehled",
+    "unitPlacer": "Rozmístění",
+    "placementGrid": "Mřížka",
+    "units": "Jednotky",
+    "hotkeys": "Zkratky",
+    "settings": "Nastavení",
+    "logs": "Záznamy"
+  },
+  "settings": {
+    "title": "Nastavení",
+    "language": "Jazyk"
+  },
+  "units": {
+    "title": "Jednotky",
+    "faction": "Frakce"
+  },
+  "placementGrid": {
+    "title": "Mřížka rozmístění",
+    "units": "Jednotky"
+  }
+}

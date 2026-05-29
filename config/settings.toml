@@ -1,11 +1,12 @@
 theme = "dark"
+locale = "en"
 tesseract_cmd = ""
 active_profile = "default"
-last_placement_template = "test"
-last_unit_panel = "unit-panel-20260525-152126"
+last_placement_template = "any test"
+last_unit_panel = "unit-panel-20260529-184415"
 
 [hotkeys]
-start_unit_placer = "ctrl+alt+f1"
+start_unit_placer = "f3"
 stop_all = "ctrl+alt+esc"
 capture_window = "ctrl+alt+w"
 

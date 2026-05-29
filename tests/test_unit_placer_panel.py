@@ -2,12 +2,14 @@ from __future__ import annotations
 
 import os
 import time
+import ctypes
 from concurrent.futures import Future
 from pathlib import Path
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
-from PySide6.QtCore import QPoint, Qt
+from PySide6.QtCore import QPoint, QPointF, Qt
+from PySide6.QtGui import QWheelEvent
 from PySide6.QtTest import QTest
 from PySide6.QtWidgets import (
     QApplication,
@@ -21,7 +23,14 @@ from PySide6.QtWidgets import (
 )
 
 from oldenera_qol.automation.mouse import AutomationTiming, EmergencyStop
-from oldenera_qol.automation.window import WindowController
+from oldenera_qol.app.widgets import (
+    SelectionOverlay,
+    _EscapeKeyBlocker,
+    _KbdLlHookStruct,
+    _VK_ESCAPE,
+    _WM_KEYDOWN,
+)
+from oldenera_qol.automation.window import WindowController, WindowInfo
 from oldenera_qol.config.settings import AppSettings, SettingsService
 from oldenera_qol.modules.placement_grid.models import PlacedUnit, PlacementTemplate
 from oldenera_qol.modules.placement_grid.repository import PlacementTemplateRepository
@@ -126,6 +135,21 @@ def test_unit_placer_refresh_shows_saved_placement_templates(tmp_path: Path) -> 
     assert panel.placement_template_list.item(0).sizeHint().height() == 56
 
 
+def test_selected_template_unit_filter_uses_only_named_units_when_template_contains_any(
+    tmp_path: Path,
+) -> None:
+    panel = _panel(tmp_path)
+    panel.selected_placement_template = PlacementTemplate(
+        name="test",
+        units=[
+            PlacedUnit("Skeleton", 0, 0, 1, "any"),
+            PlacedUnit("ANY", 0, 1, 1, "any"),
+        ],
+    )
+
+    assert panel._selected_template_unit_names() == ("Skeleton",)
+
+
 def test_unit_placer_shows_calibration_controls(tmp_path: Path) -> None:
     panel = _panel(tmp_path)
 
@@ -147,6 +171,7 @@ def test_unit_placer_shows_calibration_controls(tmp_path: Path) -> None:
     assert "Capture" not in button_texts
     assert panel.update_positions_checkbox.text() == "Update positions every second"
     assert panel.realtime_panel_checkbox.text() == "Realtime unit panel"
+    assert not panel.realtime_panel_checkbox.isChecked()
     assert panel.findChild(QLabel, "ReadinessIndicator") is panel.readiness_indicator
 
 
@@ -203,8 +228,89 @@ def test_unit_placer_action_buttons_respond_within_200ms(tmp_path: Path, monkeyp
     assert all(elapsed <= 0.2 for elapsed in elapsed_by_button.values()), elapsed_by_button
 
 
+def test_selection_overlay_returns_focus_to_game_window(tmp_path: Path, monkeypatch) -> None:
+    app = _app()
+    panel = _panel(tmp_path)
+    game_window = WindowInfo(12, "HeroesOldenEra", WindowBounds(0, 0, 800, 600))
+    focused_handles: list[int] = []
+    selected_windows: list[WindowInfo] = []
+
+    class FakeWindowController:
+        def find_by_title_hint(self, title_hint: str) -> WindowInfo | None:
+            return game_window if title_hint in {"HeroesOldenEra", "OldenEra"} else None
+
+        def focus(self, handle: int) -> bool:
+            focused_handles.append(handle)
+            return True
+
+    panel.window_controller = FakeWindowController()
+    panel.on_window_selected = selected_windows.append
+    monkeypatch.setattr(panel, "_screen_bounds", lambda: game_window.bounds)
+
+    overlay = SelectionOverlay("rectangle", "Select area")
+    panel._show_selection_overlay(overlay)
+    app.processEvents()
+
+    assert focused_handles[0] == game_window.handle
+    assert selected_windows[0] == game_window
+    overlay.close()
+    app.processEvents()
+
+
+def test_selection_overlay_accepts_focus_for_first_clicks() -> None:
+    overlay = SelectionOverlay("points", "Select grid")
+
+    assert overlay.focusPolicy() == Qt.FocusPolicy.StrongFocus
+    assert not bool(overlay.windowFlags() & Qt.WindowType.WindowDoesNotAcceptFocus)
+
+
+def test_escape_key_blocker_swallows_escape_and_cancels() -> None:
+    app = _app()
+    cancelled: list[bool] = []
+    blocker = _EscapeKeyBlocker(lambda: cancelled.append(True))
+    event = _KbdLlHookStruct(_VK_ESCAPE, 0, 0, 0, None)
+
+    result = blocker._handle_event(
+        0,
+        _WM_KEYDOWN,
+        ctypes.cast(ctypes.pointer(event), ctypes.c_void_p).value,
+    )
+    app.processEvents()
+
+    assert result == 1
+    assert cancelled == [True]
+
+
+def test_reset_confirmation_returns_focus_to_game_window(tmp_path: Path, monkeypatch) -> None:
+    app = _app()
+    panel = _panel(tmp_path)
+    game_window = WindowInfo(12, "HeroesOldenEra", WindowBounds(0, 0, 800, 600))
+    focused_handles: list[int] = []
+
+    class FakeWindowController:
+        def find_by_title_hint(self, _title_hint: str) -> WindowInfo | None:
+            return game_window
+
+        def focus(self, handle: int) -> bool:
+            focused_handles.append(handle)
+            return True
+
+    panel.window_controller = FakeWindowController()
+    monkeypatch.setattr(
+        QMessageBox,
+        "question",
+        lambda *_args, **_kwargs: QMessageBox.StandardButton.Yes,
+    )
+
+    assert panel._confirm_reset("Reset unit area") is True
+    app.processEvents()
+
+    assert focused_handles[0] == game_window.handle
+
+
 def test_realtime_readiness_indicator_turns_green_when_setup_is_complete(tmp_path: Path) -> None:
     panel = _panel(tmp_path)
+    panel.realtime_panel_checkbox.setChecked(True)
     repository = panel.placement_template_repository
     assert repository is not None
     repository.save(PlacementTemplate(name="test", units=[PlacedUnit("Skeleton", 0, 0, 1, "any")]))
@@ -247,6 +353,7 @@ def test_saved_panel_readiness_indicator_does_not_require_realtime_area(tmp_path
 
 def test_readiness_indicator_stays_red_until_all_grid_cells_are_selected(tmp_path: Path) -> None:
     panel = _panel(tmp_path)
+    panel.realtime_panel_checkbox.setChecked(True)
     repository = panel.placement_template_repository
     assert repository is not None
     repository.save(PlacementTemplate(name="test", units=[PlacedUnit("Skeleton", 0, 0, 1, "any")]))
@@ -286,6 +393,11 @@ def test_unit_panel_tab_lists_and_deletes_saved_panels(tmp_path: Path) -> None:
     assert panel.saved_unit_panel_list.count() == 1
     assert panel.saved_unit_panel_selector.count() == 1
     assert panel.saved_unit_panel_list.item(0).text().startswith(saved.name)
+    assert panel.saved_unit_panel_selector.itemText(0) == ""
+    assert not panel.saved_unit_panel_selector.itemIcon(0).isNull()
+    assert panel.saved_unit_panel_selector.iconSize().width() == 320
+    assert panel.saved_unit_panel_selector.minimumHeight() == 112
+    assert panel.saved_unit_panel_selector.minimumWidth() == 380
 
     panel.saved_unit_panel_list.setCurrentRow(0)
     panel.delete_selected_unit_panel()
@@ -293,6 +405,36 @@ def test_unit_panel_tab_lists_and_deletes_saved_panels(tmp_path: Path) -> None:
     assert panel.saved_unit_panel_list.count() == 0
     assert panel.saved_unit_panel_selector.count() == 0
     assert panel.unit_panel_repository.list_panels() == []
+
+
+def test_saved_unit_panel_selector_ignores_mouse_wheel(tmp_path: Path) -> None:
+    from PIL import Image
+
+    app = _app()
+    panel = _panel(tmp_path)
+    first = panel.unit_panel_repository.save_image(Image.new("RGB", (280, 80), "black"))
+    second = panel.unit_panel_repository.save_image(Image.new("RGB", (280, 80), "white"))
+    panel.refresh_unit_panels(first.name)
+    panel.saved_unit_panel_selector.setFocus()
+    panel.saved_unit_panel_selector.setCurrentIndex(0)
+    app.processEvents()
+    wheel_event = QWheelEvent(
+        QPointF(10, 10),
+        QPointF(10, 10),
+        QPoint(0, 0),
+        QPoint(0, -120),
+        Qt.MouseButton.NoButton,
+        Qt.KeyboardModifier.NoModifier,
+        Qt.ScrollPhase.ScrollUpdate,
+        False,
+    )
+
+    app.sendEvent(panel.saved_unit_panel_selector, wheel_event)
+    app.processEvents()
+
+    assert panel.saved_unit_panel_selector.currentIndex() == 0
+    assert panel.saved_unit_panel_selector.currentData() == first.name
+    assert panel.saved_unit_panel_selector.itemData(1) == second.name
 
 
 def test_unit_placer_remembers_last_selected_placement_template(tmp_path: Path) -> None:
@@ -319,6 +461,7 @@ def test_unit_placer_remembers_last_selected_placement_template(tmp_path: Path) 
 
 def test_canvas_clicks_save_panel_area_and_numbered_grid_cells(tmp_path: Path) -> None:
     panel = _panel(tmp_path)
+    panel.realtime_panel_checkbox.setChecked(True)
 
     panel.current_screenshot = object()
     panel.set_panel_area()
@@ -546,8 +689,77 @@ def test_calibrated_service_limits_recognition_to_selected_template_units(tmp_pa
     assert set(service.units) == {"Skeleton"}
 
 
+def test_calibrated_service_treats_unmatched_cards_as_any_for_any_template(
+    tmp_path: Path,
+) -> None:
+    panel = _panel(tmp_path)
+    skeleton = UnitRecord(
+        name="Skeleton",
+        unit_id="skeleton",
+        icon="assets/units/icons/skeleton.png",
+        visual_3d="",
+        faction="",
+        faction_id="",
+        faction_image="",
+    )
+    angel = UnitRecord(
+        name="Angel",
+        unit_id="angel",
+        icon="assets/units/icons/angel.png",
+        visual_3d="",
+        faction="",
+        faction_id="",
+        faction_image="",
+    )
+    panel.unit_repository.save({"Skeleton": skeleton, "Angel": angel})
+    panel.selected_placement_template = PlacementTemplate(
+        name="test",
+        units=[
+            PlacedUnit("Skeleton", 0, 0, 1, "any"),
+            PlacedUnit("ANY", 0, 1, 1, "max"),
+        ],
+    )
+
+    service = panel._calibrated_service()
+
+    assert set(service.units) == {"Skeleton"}
+    assert service.scanner.use_any_for_unmatched
+
+
+def test_calibrated_service_skips_icon_matching_for_all_any_template(
+    tmp_path: Path,
+) -> None:
+    panel = _panel(tmp_path)
+    panel.unit_repository.save(
+        {
+            "Skeleton": UnitRecord(
+                name="Skeleton",
+                unit_id="skeleton",
+                icon="assets/units/icons/skeleton.png",
+                visual_3d="",
+                faction="",
+                faction_id="",
+                faction_image="",
+            )
+        }
+    )
+    panel.selected_placement_template = PlacementTemplate(
+        name="test",
+        units=[
+            PlacedUnit("ANY", 0, 0, 1, "max"),
+            PlacedUnit("ANY", 0, 1, 1, "any"),
+        ],
+    )
+
+    service = panel._calibrated_service()
+
+    assert service.units == {}
+    assert service.scanner.use_any_for_unmatched
+
+
 def test_position_update_skips_when_background_scan_is_busy(tmp_path: Path, monkeypatch) -> None:
     panel = _panel(tmp_path)
+    panel.realtime_panel_checkbox.setChecked(True)
     started = []
 
     class FakeFuture:
@@ -603,6 +815,7 @@ def test_test_scan_refreshes_panel_preview_before_drawing_panel_cards(tmp_path: 
     from PIL import Image
 
     panel = _panel(tmp_path)
+    panel.realtime_panel_checkbox.setChecked(True)
     panel._save_panel_rect(Rect(10, 20, 280, 80))
     panel_image = Image.new("RGB", (280, 80), "black")
 
@@ -724,6 +937,7 @@ def test_scan_preview_uses_manual_panel_cell_numbers(tmp_path: Path) -> None:
 
 def test_test_scan_skips_too_small_panel_area(tmp_path: Path, monkeypatch) -> None:
     panel = _panel(tmp_path)
+    panel.realtime_panel_checkbox.setChecked(True)
     panel._save_panel_rect(Rect(120, 54, 47, 51))
 
     class FakeExecutor:
@@ -803,6 +1017,49 @@ def test_move_units_aborts_when_scan_has_unknown_units(tmp_path: Path, monkeypat
 
     assert result["actions"] == []
     assert "unknown units on panel card(s) 3" in result["logs"][0]
+
+
+def test_move_units_focuses_game_window_before_starting(tmp_path: Path, monkeypatch) -> None:
+    panel = _panel(tmp_path)
+    panel.realtime_panel_checkbox.setChecked(True)
+    panel.calibration = UnitPlacerCalibration(
+        profile_name="default",
+        panel_scan_rect=Rect(10, 20, 280, 80),
+        grid_cells=_complete_grid_cells(panel),
+    )
+    panel.selected_placement_template = PlacementTemplate(
+        name="test",
+        units=[PlacedUnit("Skeleton", 0, 0, 1, "any")],
+    )
+    events: list[str] = []
+
+    class FakeService:
+        def scan(self, *_args, **_kwargs):
+            return []
+
+        def plan(self, *_args):
+            return MovePlan([], ["planned"])
+
+    class ImmediateExecutor:
+        def submit(self, fn, *args):
+            events.append("start")
+            future = Future()
+            future.set_result(fn(*args))
+            return future
+
+    monkeypatch.setattr(panel, "_focus_game_window", lambda: events.append("focus") or True)
+    monkeypatch.setattr(panel, "_scan_executor", ImmediateExecutor())
+    monkeypatch.setattr(panel, "_screen_bounds", lambda: WindowBounds(0, 0, 1920, 1080))
+    monkeypatch.setattr(panel, "_calibrated_service", lambda: FakeService())
+    monkeypatch.setattr(panel, "_capture_live_panel_image", lambda *_args: object())
+
+    panel.move_units()
+    assert events == ["focus"]
+
+    QTest.qWait(150)
+    _app().processEvents()
+
+    assert events == ["focus", "start"]
 
 
 def test_test_scan_remembers_successful_panel_detections(tmp_path: Path) -> None:

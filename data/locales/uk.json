@@ -1,0 +1,23 @@
+{
+  "nav": {
+    "dashboard": "Панель",
+    "unitPlacer": "Розстановка",
+    "placementGrid": "Сітка",
+    "units": "Юніти",
+    "hotkeys": "Гарячі клавіші",
+    "settings": "Налаштування",
+    "logs": "Журнал"
+  },
+  "settings": {
+    "title": "Налаштування",
+    "language": "Мова"
+  },
+  "units": {
+    "title": "Юніти",
+    "faction": "Фракція"
+  },
+  "placementGrid": {
+    "title": "Сітка розстановки",
+    "units": "Юніти"
+  }
+}

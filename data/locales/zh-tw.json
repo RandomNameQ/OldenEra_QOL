@@ -1,0 +1,23 @@
+{
+  "nav": {
+    "dashboard": "儀表板",
+    "unitPlacer": "單位布置",
+    "placementGrid": "佈陣網格",
+    "units": "單位",
+    "hotkeys": "快捷鍵",
+    "settings": "設定",
+    "logs": "日誌"
+  },
+  "settings": {
+    "title": "設定",
+    "language": "語言"
+  },
+  "units": {
+    "title": "單位",
+    "faction": "陣營"
+  },
+  "placementGrid": {
+    "title": "佈陣網格",
+    "units": "單位"
+  }
+}
